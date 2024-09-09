@@ -9,6 +9,7 @@
  *
  */
 
+#include <zoPhysicsSystem2d.hpp>
 // MonkVG OpenVG interface
 #include <MonkVG/openvg.h>
 #include <MonkVG/vgext.h>
@@ -54,8 +55,8 @@ int main(int argc, char **argv) {
 #endif
 
     // Open a window and create its OpenGL context
-    GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT,
-                                          "Zero Physics Hello World", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(
+        WINDOW_WIDTH, WINDOW_HEIGHT, "Zero Physics Hello World", NULL, NULL);
     if (window == NULL) {
         fprintf(stderr, "Failed to open GLFW window.\n");
         glfwTerminate();
@@ -93,6 +94,27 @@ int main(int argc, char **argv) {
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
+    /// initialize the physics system
+    std::shared_ptr<zo::PhysicsSystem2d> physics_system =
+        zo::PhysicsSystem2d::create();
+
+    zo::PhysicsSystem2d::force_handle_t up =
+        physics_system->addGlobalForce(glm::vec2(0.0f, 1));
+    zo::PhysicsSystem2d::force_handle_t down =
+        physics_system->addGlobalForce(glm::vec2(0.0f, 2));
+    physics_system->removeGlobalForce(up);
+    zo::PhysicsSystem2d::force_handle_t right =
+        physics_system->addGlobalForce(glm::vec2(3, 0.0f));
+    zo::PhysicsSystem2d::force_handle_t left =
+        physics_system->addGlobalForce(glm::vec2(4, 0.0f));
+
+    glm::vec2 force = physics_system->getGlobalForce(right).value_or(glm::vec2(0, 0));
+    std::cout << force.x << " " << force.y << std::endl << std::endl;
+
+    for (auto f : physics_system->globalForces()) {
+        std::cout << f.x << " " << f.y << std::endl;
+    }
+
     do {
 
         // Clear the screen.
@@ -102,6 +124,8 @@ int main(int argc, char **argv) {
         /// do an ortho camera
         // NOTE:  this is not standard OpenVG
         vgPushOrthoCamera(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f);
+
+        physics_system->update(1.0f / 60.0f);
 
         /// draw the basic path
         // set up path trasnform

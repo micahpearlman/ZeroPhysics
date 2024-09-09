@@ -1,0 +1,33 @@
+/**
+ * @file zoPhysicsComponent2d.hpp
+ * @author Micah Pearlman (micahpearlman@gmail.com)
+ * @brief
+ * @version 0.1
+ * @date 2024-09-09
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+#ifndef __zoPhysicsComponent2d_h__
+#define __zoPhysicsComponent2d_h__
+#include <glm/glm.hpp>
+namespace zo {
+class PhysicsComponent2d {
+  public:
+    using force_handle_t = uint32_t;
+
+  public:
+    virtual ~PhysicsComponent2d() = default;
+    virtual void           setMass(float mass) = 0;
+    virtual float          mass() const = 0;
+    virtual void           setPosition(const glm::vec2 &p) = 0;
+    virtual glm::vec2      position() const = 0;
+    virtual void           setVelocity(const glm::vec2 &v) = 0;
+    virtual glm::vec2      velocity() const = 0;
+    virtual void           setAcceleration(const glm::vec2 &a) = 0;
+    virtual glm::vec2      acceleration() const = 0;
+    virtual force_handle_t addForce(const glm::vec2 &f) = 0;
+    virtual void           removeForce(force_handle_t id) = 0;
+};
+} // namespace zo
+#endif // __zoPhysicsComponent2d_h__
