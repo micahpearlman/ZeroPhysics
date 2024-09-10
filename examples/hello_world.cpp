@@ -30,6 +30,35 @@
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
 
+class GameObject {
+    private:
+    VGPath  _path;
+    VGPaint _fill_paint;
+    VGPaint _stroke_paint;
+
+    std::unique_ptr<zo::PhysicsComponent2d> _phy_obj;
+
+    public:
+    GameObject(VGPath path, VGPaint fill_paint, VGPaint stroke_paint,
+               std::unique_ptr<zo::PhysicsComponent2d> phy_obj)
+        : _path(path), _fill_paint(fill_paint), _stroke_paint(stroke_paint),
+          _phy_obj(std::move(phy_obj)) {}
+
+    void draw() {
+        // set up path trasnform
+        vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
+        vgLoadIdentity();
+        glm::vec2 pos = _phy_obj->position();
+        vgTranslate(pos.x, pos.y);
+        // fill and stroke paints
+        vgSetPaint(_fill_paint, VG_FILL_PATH);
+        vgSetPaint(_stroke_paint, VG_STROKE_PATH);
+
+        // draw the path with fill and stroke
+        vgDrawPath(_path, VG_FILL_PATH | VG_STROKE_PATH);
+    }
+};
+
 int main(int argc, char **argv) {
     std::cout << "Hello, MonkVG!\n";
     // Initialise GLFW
@@ -96,25 +125,30 @@ int main(int argc, char **argv) {
 
     /// initialize the physics system
     std::shared_ptr<zo::PhysicsSystem2d> physics_system =
-        zo::PhysicsSystem2d::create();
+        zo::PhysicsSystem2d::create(1);
 
-    zo::PhysicsSystem2d::force_handle_t up =
-        physics_system->addGlobalForce(glm::vec2(0.0f, 1));
-    zo::PhysicsSystem2d::force_handle_t down =
-        physics_system->addGlobalForce(glm::vec2(0.0f, 2));
-    physics_system->removeGlobalForce(up);
-    zo::PhysicsSystem2d::force_handle_t right =
-        physics_system->addGlobalForce(glm::vec2(3, 0.0f));
-    zo::PhysicsSystem2d::force_handle_t left =
-        physics_system->addGlobalForce(glm::vec2(4, 0.0f));
+    // create a physics object
+    zo::PhysicsSystem2d::phy_obj_handle_t phy_obj_hndl =
+        physics_system->createPhysicsComponent();
+    std::unique_ptr<zo::PhysicsComponent2d> phy_obj =
+        physics_system->getPhysicsComponentView(phy_obj_hndl);
+    phy_obj->setPosition({100, 100});
 
-    glm::vec2 force = physics_system->getGlobalForce(right).value_or(glm::vec2(0, 0));
-    std::cout << force.x << " " << force.y << std::endl << std::endl;
+    physics_system->addGlobalForce({0, 9.8f});
+    phy_obj->setVelocity({10, 0});
 
-    for (auto f : physics_system->globalForces()) {
-        std::cout << f.x << " " << f.y << std::endl;
-    }
+    // create a small vg circle to represent the physics object
+    VGPath circle = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
+                                 0, 0, 0, VG_PATH_CAPABILITY_ALL);
+    vguEllipse(circle, 0.0f, 0.0f, 10.0f, 10.0f);
 
+    std::unique_ptr<GameObject> game_obj =
+        std::make_unique<GameObject>(circle, fill_paint, stroke_paint,
+                                     std::move(phy_obj));
+
+    float last_time = glfwGetTime();
+    double previous_seconds = glfwGetTime();
+    int frame_count = 0;
     do {
 
         // Clear the screen.
@@ -125,26 +159,34 @@ int main(int argc, char **argv) {
         // NOTE:  this is not standard OpenVG
         vgPushOrthoCamera(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f);
 
-        physics_system->update(1.0f / 60.0f);
+        // update the physics system
+        float delta_time = glfwGetTime() - last_time;
+        physics_system->update(delta_time);
+        last_time = glfwGetTime();
 
         /// draw the basic path
-        // set up path trasnform
-        vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
-        vgLoadIdentity();
-        vgTranslate(width / 2, height / 2);
-
-        // stroke wideth
-        vgSetf(VG_STROKE_LINE_WIDTH, 5.0f);
-
-        // fill and stroke paints
-        vgSetPaint(fill_paint, VG_FILL_PATH);
-        vgSetPaint(stroke_paint, VG_STROKE_PATH);
-
-        // draw the path with fill and stroke
-        vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
+        game_obj->draw();
 
         // pop the ortho camera
         vgPopOrthoCamera();
+
+        // calculate the frame rate
+        
+        double current_seconds = glfwGetTime();
+        double elapsed_seconds = current_seconds - previous_seconds;
+        if (elapsed_seconds > 0.25) {
+            previous_seconds = current_seconds;
+            double fps = (double)frame_count / elapsed_seconds;
+            double ms_per_frame = 1000.0 / fps;
+
+            char tmp[128];
+            sprintf(tmp, "Zero Physics Hello World - %.2f ms/frame (%.1f FPS)",
+                    ms_per_frame, fps);
+            glfwSetWindowTitle(window, tmp);
+            frame_count = 0;
+            // std::cout << ms_per_frame << " ms/frame (" << fps << " FPS)\n";
+        }
+        frame_count++;
 
         // Swap buffers
         glfwSwapBuffers(window);

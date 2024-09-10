@@ -12,7 +12,6 @@ add_subdirectory(thirdparty/glm)
 set(GLM_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm)
 set(ZOPHY_SOURCE_FILES
     src/zoPhysicsSystem2d.cpp
-    src/zoPhysicsComponent2d.cpp
     src/zoPhysicsCollider2d.cpp
 )
 set(ZOPHY_INCLUDE_DIRS
