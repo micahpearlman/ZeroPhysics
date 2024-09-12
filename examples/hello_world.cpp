@@ -10,6 +10,9 @@
  */
 
 #include <zoPhysicsSystem2d.hpp>
+#include <zoPhysicsComponent2d.hpp>
+#include <zoPhysicsTypes.hpp>
+
 // MonkVG OpenVG interface
 #include <MonkVG/openvg.h>
 #include <MonkVG/vgext.h>
@@ -31,18 +34,19 @@
 #define WINDOW_HEIGHT 768
 
 class GameObject {
-    private:
+  private:
     VGPath  _path;
     VGPaint _fill_paint;
     VGPaint _stroke_paint;
 
     std::unique_ptr<zo::PhysicsComponent2d> _phy_obj;
+    std::shared_ptr<zo::PhysicsSystem2d>    _physics_system;
 
-    public:
+  public:
     GameObject(VGPath path, VGPaint fill_paint, VGPaint stroke_paint,
-               std::unique_ptr<zo::PhysicsComponent2d> phy_obj)
-        : _path(path), _fill_paint(fill_paint), _stroke_paint(stroke_paint),
-          _phy_obj(std::move(phy_obj)) {}
+               std::shared_ptr<zo::PhysicsSystem2d> physics_system,
+               glm::vec2 position, glm::vec2 velocity)
+        : _path(path), _fill_paint(fill_paint), _stroke_paint(stroke_paint) {}
 
     void draw() {
         // set up path trasnform
@@ -57,6 +61,15 @@ class GameObject {
         // draw the path with fill and stroke
         vgDrawPath(_path, VG_FILL_PATH | VG_STROKE_PATH);
     }
+
+    ~GameObject() {
+        vgDestroyPath(_path);
+        vgDestroyPaint(_fill_paint);
+        vgDestroyPaint(_stroke_paint);
+    }
+
+    // get physics object
+    zo::PhysicsComponent2d *physicsObject() { return _phy_obj.get(); }
 };
 
 int main(int argc, char **argv) {
@@ -128,7 +141,7 @@ int main(int argc, char **argv) {
         zo::PhysicsSystem2d::create(1);
 
     // create a physics object
-    zo::PhysicsSystem2d::phy_obj_handle_t phy_obj_hndl =
+    zo::phy_obj_handle_t phy_obj_hndl =
         physics_system->createPhysicsComponent();
     std::unique_ptr<zo::PhysicsComponent2d> phy_obj =
         physics_system->getPhysicsComponentView(phy_obj_hndl);
@@ -142,13 +155,25 @@ int main(int argc, char **argv) {
                                  0, 0, 0, VG_PATH_CAPABILITY_ALL);
     vguEllipse(circle, 0.0f, 0.0f, 10.0f, 10.0f);
 
-    std::unique_ptr<GameObject> game_obj =
-        std::make_unique<GameObject>(circle, fill_paint, stroke_paint,
-                                     std::move(phy_obj));
+    // FIXME:  this is not working ~V BELOW ~V
+    // create a floor physics object and render object
+    zo::phy_obj_handle_t floor_hndl =
+        physics_system->createPhysicsComponent();
+    std::unique_ptr<zo::PhysicsComponent2d> floor = physics_system->getPhysicsComponentView(floor_hndl);
+    floor->setMass(-1.0f);  // infinite mass
+    // floor->setPosition({0, 200});
+    // floor->setStatic(true);  // TODO: FIXME: this is not working
 
-    float last_time = glfwGetTime();
+    // // create a floor path
+    VGPath floor_path = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
+                                     0, 0, 0, VG_PATH_CAPABILITY_ALL);
+    vguRect(floor_path, 0.0f, height - 10.0f, width, 10.0f);
+
+
+
+    float  last_time = glfwGetTime();
     double previous_seconds = glfwGetTime();
-    int frame_count = 0;
+    int    frame_count = 0;
     do {
 
         // Clear the screen.
@@ -165,13 +190,32 @@ int main(int argc, char **argv) {
         last_time = glfwGetTime();
 
         /// draw the basic path
-        game_obj->draw();
+        vgLoadIdentity();
+
+        // draw the floor
+        vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
+        vgLoadIdentity();
+        vgSetPaint(fill_paint, VG_FILL_PATH);
+        vgSetPaint(stroke_paint, VG_STROKE_PATH);
+        vgDrawPath(floor_path, VG_FILL_PATH | VG_STROKE_PATH);
+
+
+        // draw object
+        vgLoadIdentity();
+        glm::vec2 pos = phy_obj->position();
+        vgTranslate(pos.x, pos.y);
+        // fill and stroke paints
+        vgSetPaint(fill_paint, VG_FILL_PATH);
+        vgSetPaint(stroke_paint, VG_STROKE_PATH);
+
+        // draw the path with fill and stroke
+        vgDrawPath(circle, VG_FILL_PATH | VG_STROKE_PATH);
 
         // pop the ortho camera
         vgPopOrthoCamera();
 
         // calculate the frame rate
-        
+
         double current_seconds = glfwGetTime();
         double elapsed_seconds = current_seconds - previous_seconds;
         if (elapsed_seconds > 0.25) {

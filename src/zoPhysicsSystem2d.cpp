@@ -28,45 +28,46 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
     /// @brief A view of the VerletComponentData
     class PhysicsComponent2dView : public PhysicsComponent2d {
       public:
-        PhysicsComponent2dView(glm::vec2 &p, glm::vec2 &pp, glm::vec2 &a,
-                               float &m, glm::vec2 &f, PhysicsSystem2dImpl &sys,
-                               phy_obj_handle_t hndl)
-            : _position(p), _prev_position(pp), _acceleration(a), _mass(m),
-              _force(f), _sys(sys), _hndl(hndl) {}
+        PhysicsComponent2dView(PhysicsSystem2dImpl &sys, phy_obj_handle_t hndl)
+            : _sys(sys), _hndl(hndl) {}
 
-        void  setMass(float mass) override { _mass = mass; }
-        float mass() const override { return _mass; }
+        void  setMass(float mass) override { data().mass = mass; }
+        float mass() const override { return data().mass; }
         void  setPosition(const glm::vec2 &p) override {
-            _position = p;
-            _prev_position = p;
+            data().position = p;
+            data().prev_position = p;
         }
-        glm::vec2 position() const override { return _position; }
+        glm::vec2 position() const override { return data().position; }
         void      setVelocity(const glm::vec2 &v) override {
             // because velocity isn't explicit in verlet we will "trick"
             // velocity by setting the previous position to the current position
             // minus the velocity
-            _prev_position = _position - (v * _sys.lastTimeStep());
+            data().prev_position = data().position - (v * _sys.lastTimeStep());
         }
         glm::vec2 velocity() const override {
             // remember that velocity isn't explicit in verlet so we will
             // calculate it
-            return _prev_position - _position;
+            return data().prev_position - data().position;
         }
-        void setAcceleration(const glm::vec2 &a) override { _acceleration = a; }
-        glm::vec2        acceleration() const override { return _acceleration; }
-        void             addForce(const glm::vec2 &f) override { _force += f; }
-        void             zeroForce() override { _force = glm::vec2(0); }
-        phy_obj_handle_t handle() const { return _hndl; }
-        bool             isValid() const override {
+        void setAcceleration(const glm::vec2 &a) override {
+            data().acceleration = a;
+        }
+        glm::vec2 acceleration() const override { return data().acceleration; }
+        void      addForce(const glm::vec2 &f) override { data().force += f; }
+        void      zeroForce() override { data().force = glm::vec2(0); }
+        bool      isValid() const override {
             return _sys.isPhysicsComponentValid(_hndl);
         }
+        void setStatic(bool is_static) override {
+            setMass(is_static ? -1.0f : 1.0f);
+        }
+        bool isStatic() const override { return data().mass <= 0.0f; }
+        phy_obj_handle_t handle() const override { return _hndl; }
+
+        VerletComponentData &data() { return _sys.physicsComponent(_hndl); }
+        const VerletComponentData &data() const { return _sys.physicsComponent(_hndl); }
 
       private:
-        glm::vec2           &_position;
-        glm::vec2           &_prev_position;
-        glm::vec2           &_acceleration;
-        float               &_mass;
-        glm::vec2           &_force;
         PhysicsSystem2dImpl &_sys;
         phy_obj_handle_t     _hndl;
     };
@@ -82,9 +83,11 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
         }
         for (int i = 0; i < _iterations; i++) {
             float iter_dt = dt / float(_iterations);
-            for (auto &phy_obj : _physics_components) {
-                VerletComponentData &data = phy_obj;
-                glm::vec2            force = data.force;
+            for (VerletComponentData &data : _physics_components) {
+                if (data.mass <= 0) { // static object
+                    continue;
+                }
+                glm::vec2 force = data.force;
                 force += global_force_sum;
                 glm::vec2 acceleration = force / data.mass;
                 glm::vec2 new_position = data.position +
@@ -127,9 +130,7 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
             return nullptr;
         }
         VerletComponentData &data = result->get();
-        return std::make_unique<PhysicsComponent2dView>(
-            data.position, data.prev_position, data.acceleration, data.mass,
-            data.force, *this, hndl);
+        return std::make_unique<PhysicsComponent2dView>(*this, hndl);
     }
 
     bool isPhysicsComponentValid(phy_obj_handle_t hndl) const override {
@@ -137,6 +138,14 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
     }
 
     float lastTimeStep() const { return _last_time_step; }
+
+    ComponentStore<VerletComponentData> &physicsComponents() {
+        return _physics_components;
+    }
+
+    VerletComponentData &physicsComponent(phy_obj_handle_t hndl) {
+        return _physics_components.get(hndl)->get();
+    }
 
   protected:
     float                               _last_time_step = 1 / 60.0f;

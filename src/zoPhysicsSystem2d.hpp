@@ -12,13 +12,12 @@
 #define __zoPhysicsSystem2d_h__
 #include "zoPhysicsComponent2d.hpp"
 #include "zoPhysicsMemory.hpp"
+#include "zoPhysicsTypes.hpp"
+#include <optional>
 #include <memory>
 #include <glm/glm.hpp>
 namespace zo {
 class PhysicsSystem2d {
-  public:
-    using force_handle_t = uint32_t;
-    using phy_obj_handle_t = uint32_t;
 
   public:
     virtual ~PhysicsSystem2d() = default;
