@@ -15,7 +15,13 @@
 #include <unordered_map>
 #include <optional>
 namespace zo {
-
+/**
+ * @brief A simple component store that uses a vector to store components and a map to store the handle to index mapping.
+ * This is intended to be be an efficient way to store components as it provides data locality and O(1) access to components.
+ * Adding and removing components is O(1) as well.
+ * 
+ * @tparam T The type of component to store.
+ */
 template <typename T> class ComponentStore {
   public:
     using handle_t = uint64_t;

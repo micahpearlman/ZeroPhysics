@@ -30,7 +30,7 @@ class PhysicsComponent2d {
     virtual bool             isValid() const = 0;
     virtual void             setStatic(bool isStatic) = 0;
     virtual bool             isStatic() const = 0;
-    virtual phy_obj_handle_t handle() const = 0;
+    virtual phy_obj_handle_2d_t handle() const = 0;
 };
 } // namespace zo
 #endif // __zoPhysicsComponent2d_h__

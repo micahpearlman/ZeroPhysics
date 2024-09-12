@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
         zo::PhysicsSystem2d::create(1);
 
     // create a physics object
-    zo::phy_obj_handle_t phy_obj_hndl =
+    zo::phy_obj_handle_2d_t phy_obj_hndl =
         physics_system->createPhysicsComponent();
     std::unique_ptr<zo::PhysicsComponent2d> phy_obj =
         physics_system->getPhysicsComponentView(phy_obj_hndl);
@@ -153,11 +153,11 @@ int main(int argc, char **argv) {
     // create a small vg circle to represent the physics object
     VGPath circle = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
                                  0, 0, 0, VG_PATH_CAPABILITY_ALL);
-    vguEllipse(circle, 0.0f, 0.0f, 10.0f, 10.0f);
+    vguEllipse(circle, 0.0f, 0.0f, 30.0f, 30.0f);
 
     // FIXME:  this is not working ~V BELOW ~V
     // create a floor physics object and render object
-    zo::phy_obj_handle_t floor_hndl =
+    zo::phy_obj_handle_2d_t floor_hndl =
         physics_system->createPhysicsComponent();
     std::unique_ptr<zo::PhysicsComponent2d> floor = physics_system->getPhysicsComponentView(floor_hndl);
     floor->setMass(-1.0f);  // infinite mass

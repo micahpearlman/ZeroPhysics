@@ -28,7 +28,7 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
     /// @brief A view of the VerletComponentData
     class PhysicsComponent2dView : public PhysicsComponent2d {
       public:
-        PhysicsComponent2dView(PhysicsSystem2dImpl &sys, phy_obj_handle_t hndl)
+        PhysicsComponent2dView(PhysicsSystem2dImpl &sys, phy_obj_handle_2d_t hndl)
             : _sys(sys), _hndl(hndl) {}
 
         void  setMass(float mass) override { data().mass = mass; }
@@ -62,14 +62,14 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
             setMass(is_static ? -1.0f : 1.0f);
         }
         bool isStatic() const override { return data().mass <= 0.0f; }
-        phy_obj_handle_t handle() const override { return _hndl; }
+        phy_obj_handle_2d_t handle() const override { return _hndl; }
 
         VerletComponentData &data() { return _sys.physicsComponent(_hndl); }
         const VerletComponentData &data() const { return _sys.physicsComponent(_hndl); }
 
       private:
         PhysicsSystem2dImpl &_sys;
-        phy_obj_handle_t     _hndl;
+        phy_obj_handle_2d_t     _hndl;
     };
 
   public:
@@ -100,13 +100,13 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
             }
         }
     }
-    force_handle_t addGlobalForce(const glm::vec2 &f) override {
+    force_handle_2d_t addGlobalForce(const glm::vec2 &f) override {
         return _global_forces.add(f);
     }
-    void removeGlobalForce(force_handle_t id) override {
+    void removeGlobalForce(force_handle_2d_t id) override {
         _global_forces.remove(id);
     }
-    std::optional<glm::vec2> getGlobalForce(force_handle_t id) const override {
+    std::optional<glm::vec2> getGlobalForce(force_handle_2d_t id) const override {
         return _global_forces.get(id);
     }
 
@@ -114,17 +114,17 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
         return _global_forces;
     }
 
-    phy_obj_handle_t createPhysicsComponent() override {
+    phy_obj_handle_2d_t createPhysicsComponent() override {
         VerletComponentData data;
         return _physics_components.add(data);
     }
 
-    void destroyPhysicsComponent(phy_obj_handle_t hndl) override {
+    void destroyPhysicsComponent(phy_obj_handle_2d_t hndl) override {
         _physics_components.remove(hndl);
     }
 
     std::unique_ptr<PhysicsComponent2d>
-    getPhysicsComponentView(phy_obj_handle_t hndl) override {
+    getPhysicsComponentView(phy_obj_handle_2d_t hndl) override {
         auto result = _physics_components.get(hndl);
         if (result == std::nullopt) {
             return nullptr;
@@ -133,7 +133,7 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
         return std::make_unique<PhysicsComponent2dView>(*this, hndl);
     }
 
-    bool isPhysicsComponentValid(phy_obj_handle_t hndl) const override {
+    bool isPhysicsComponentValid(phy_obj_handle_2d_t hndl) const override {
         return _physics_components.get(hndl) != std::nullopt;
     }
 
@@ -143,7 +143,7 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
         return _physics_components;
     }
 
-    VerletComponentData &physicsComponent(phy_obj_handle_t hndl) {
+    VerletComponentData &physicsComponent(phy_obj_handle_2d_t hndl) {
         return _physics_components.get(hndl)->get();
     }
 

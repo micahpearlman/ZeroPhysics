@@ -12,7 +12,9 @@
 #define __zoPhysicsTypes_h__
 #include <cstdint>
 namespace zo {
-using force_handle_t = uint64_t;
-using phy_obj_handle_t = uint64_t;
+// handles
+using force_handle_2d_t = uint64_t;
+using phy_obj_handle_2d_t = uint64_t;
+using collider_handle_2d_t = uint64_t;
 } // namespace zo
 #endif // __zoPhysicsTypes_h__
