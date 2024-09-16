@@ -1,6 +1,7 @@
 # ZeroPhysics Unit Tests
 
 find_package(GTest REQUIRED)
+set(GLM_ENABLE_CXX_20 ON)
 
 
 add_executable(zo_unit_tests test_zoPhysicsMemory.cpp)

@@ -91,6 +91,62 @@ TEST_F(ComponentStoreTest, AddAndRemoveMultipleComponents) {
     EXPECT_EQ(retrieved3->get().value, 126);
 }
 
+class MemoryPoolTest : public ::testing::Test {
+  protected:
+    MemoryPool<TestComponent> pool;
+
+    void SetUp() override {
+        // Initialize any necessary data here
+    }
+
+    void TearDown() override {
+        // Clean up any necessary data here
+    }
+};
+
+TEST_F(MemoryPoolTest, AllocateAndDeallocate) {
+    auto *component = pool.allocate();
+    ASSERT_NE(component, nullptr);
+    component->value = 42;
+    EXPECT_EQ(component->value, 42);
+
+    pool.deallocate(component);
+    auto *new_component = pool.allocate();
+    ASSERT_NE(new_component, nullptr);
+    component->value = 13;
+    EXPECT_EQ(new_component->value,
+              13); // Memory is reused, so value should be the same
+}
+
+TEST_F(MemoryPoolTest, AllocateUntilExhaustion) {
+    std::vector<TestComponent *> allocated_components;
+    for (size_t i = 0; i < 1024; ++i) {
+        auto *component = pool.allocate();
+        ASSERT_NE(component, nullptr);
+        component->value = -i;
+        allocated_components.push_back(component);
+    }
+
+    auto *component = pool.allocate();
+    EXPECT_EQ(component, nullptr); // Pool should be exhausted
+
+    for (auto *comp : allocated_components) {
+        pool.deallocate(comp);
+    }
+    // print out the allocated components
+    printf("done");
+}
+
+TEST_F(MemoryPoolTest, UseAsStdAllocator) {
+    std::vector<TestComponent, MemoryPool<TestComponent>> vec(pool);
+    vec.push_back(TestComponent{42});
+    vec.push_back(TestComponent{84});
+
+    ASSERT_EQ(vec.size(), 2);
+    EXPECT_EQ(vec[0].value, 42);
+    EXPECT_EQ(vec[1].value, 84);
+}
+
 } // namespace zo
 
 int main(int argc, char **argv) {
