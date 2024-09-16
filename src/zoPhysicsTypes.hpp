@@ -11,10 +11,40 @@
 #ifndef __zoPhysicsTypes_h__
 #define __zoPhysicsTypes_h__
 #include <cstdint>
+#include <glm/glm.hpp>
 namespace zo {
 // handles
 using force_handle_2d_t = uint64_t;
 using phy_obj_handle_2d_t = uint64_t;
 using collider_handle_2d_t = uint64_t;
+
+struct line_segment_2d_t {
+    glm::vec2 start;
+    glm::vec2 end;
+};
+
+struct aabb_2d_t {
+    glm::vec2 min;
+    glm::vec2 max;
+};
+
+struct circle_2d_t {
+    glm::vec2 center;
+    float radius;
+};
+
+struct ray_2d_t {
+    glm::vec2 origin;
+    glm::vec2 direction;
+};
+
+struct contact_2d_t {
+    glm::vec2 normal;
+    glm::vec2 point;
+    float penetration;
+};
+
+
+
 } // namespace zo
 #endif // __zoPhysicsTypes_h__
