@@ -133,8 +133,6 @@ TEST_F(MemoryPoolTest, AllocateUntilExhaustion) {
     for (auto *comp : allocated_components) {
         pool.deallocate(comp);
     }
-    // print out the allocated components
-    printf("done");
 }
 
 TEST_F(MemoryPoolTest, UseAsStdAllocator) {

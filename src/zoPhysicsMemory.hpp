@@ -14,7 +14,6 @@
 #include <vector>
 #include <unordered_map>
 #include <optional>
-#include <variant>
 
 namespace zo {
 
@@ -36,22 +35,22 @@ template <typename T> class MemoryPool {
         // allocate the pool
         _pool.resize(_pool_size);
         _next = 0;
-        // generate the free list
-        for (size_t i = 0; i < _pool_size; i++) {
-            _pool[i] = i + 1;
-        }
-        _pool[_pool_size - 1] = size_t(-1);
 
-        // set the first element to be the start pointer
-        size_t tmp_next_idx = std::get<size_t>(_pool[0]);
-        _pool[0] = T();
-        _start_ptr = &std::get<T>(_pool[0]);
-        _pool[0] = tmp_next_idx;
-        
-        
+        // generate the free list by setting each element to the next index
+        for (size_t i = 0; i < _pool_size; i++) {
+            _pool[i].next = i + 1;
+        }
+        _pool[_pool_size - 1].next = size_t(-1);
     }
 
-    ~MemoryPool() {}
+    ~MemoryPool() {
+        // destroy all allocated objects
+        for (size_t i = 0; i < _pool_size; i++) {
+            if (i >= _next && i != size_t(-1)) {
+                _pool[i].object.~T();
+            }
+        }
+    }
 
     /**
      * @brief Allocate a new object from the memory pool.
@@ -63,10 +62,13 @@ template <typename T> class MemoryPool {
             return nullptr;
         }
         size_t free_idx = _next;
-        _next = std::get<size_t>(_pool[_next]);
-        _pool[free_idx] = T();
+        _next = _pool[free_idx].next;
 
-        return &std::get<T>(_pool[free_idx]);
+        // placement new to construct object at free index
+        T *new_obj = reinterpret_cast<T *>(&_pool[free_idx].object);
+        new (new_obj) T();
+
+        return new_obj;
     }
 
     /**
@@ -89,12 +91,16 @@ template <typename T> class MemoryPool {
      * @param ptr A pointer to the object to deallocate.
      */
     void deallocate(T *ptr) {
-        int idx = (ptr - _start_ptr)/sizeof(T);
+        int idx = reinterpret_cast<MemoryPoolElement*>(ptr) - &_pool.front();
         if (idx > _pool_size || idx < 0) {
-            return;
+            return; // out of bounds
         }
 
-        _pool[idx] = _next;
+        // call the destructor
+        _pool[idx].object.~T();
+
+        // add the index to the free list
+        _pool[idx].next = _next;
         _next = idx;
     }
 
@@ -110,13 +116,38 @@ template <typename T> class MemoryPool {
         }
     }
 
+    /**
+     * @brief Constructs an object in place at the given pointer.
+     *
+     * @tparam U
+     * @tparam Args
+     * @param ptr
+     * @param args
+     */
+    template <typename U, typename... Args>
+    void construct(U *ptr, Args &&...args) {
+        new (ptr) U(std::forward<Args>(args)...);
+    }
+
+    /**
+     * @brief Destroy an object in place at the given pointer.
+     *
+     * @tparam U
+     * @param ptr
+     */
+    template <typename U> void destroy(U *ptr) { ptr->~U(); }
+
   private:
+    union alignas(std::max_align_t) MemoryPoolElement {
+        T      object;
+        size_t next;
+        MemoryPoolElement() : next(0) {}
+    };
     size_t _pool_size = 0;
     // the memory pool with T being the object and size_t being the next free
     // index
-    std::vector<std::variant<T, size_t>> _pool;
-    size_t                               _next = 0;
-    T                                   *_start_ptr = nullptr;
+    std::vector<MemoryPoolElement> _pool;
+    size_t                         _next = 0;
 };
 
 /**
