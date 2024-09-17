@@ -19,6 +19,7 @@ set(ZOPHY_SOURCE_FILES
     src/zoPhysicsSystem2d.cpp
     src/zoPhysicsCollider2d.cpp
     src/zoPhysicsMath.cpp
+    src/zoPhysicsComponent2d.cpp
 )
 set(ZOPHY_INCLUDE_DIRS
     ./include

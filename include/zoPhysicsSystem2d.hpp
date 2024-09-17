@@ -63,6 +63,9 @@ class PhysicsSystem2d {
     /// @return PhysicsComponent2d a view of the physics component.
     virtual std::unique_ptr<PhysicsComponent2d> getPhysicsComponentView(phy_obj_handle_2d_t hndl) = 0;
 
+    /// @brief Check if the physics object handle is valid.
+    /// @param hndl The handle to the physics object.
+    /// @return bool true if the physics object handle is valid.
     virtual bool isPhysicsComponentValid(phy_obj_handle_2d_t hndl) const = 0;
 
 
