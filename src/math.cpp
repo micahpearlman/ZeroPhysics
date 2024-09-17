@@ -1,4 +1,14 @@
-#include "zoPhysicsMath.hpp"
+/**
+ * @file math.cpp
+ * @author Micah Pearlman (micahpearlman@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2024-09-17
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+#include <zero_physics/math.hpp>
 
 namespace zo {
 glm::vec2 closest_point_on_line_segment(const glm::vec2         &p,

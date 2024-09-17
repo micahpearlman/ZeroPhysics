@@ -1,5 +1,5 @@
 /**
- * @file zoPhysicsCollisionSys.hpp
+ * @file collision_system_2d.hpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
  * @brief Manages collision detection.  Ultimately returns a list of collision pairs.
  * @version 0.1
@@ -10,7 +10,7 @@
  */
 #ifndef __zoPhysicsCollisionSys_hpp__
 #define __zoPhysicsCollisionSys_hpp__
-#include <zoPhysicsTypes.hpp>
+#include <zero_physics/types.hpp>
 #include <memory>
 namespace zo {
 class CollisionSystem2d {

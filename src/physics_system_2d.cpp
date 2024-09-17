@@ -1,5 +1,5 @@
 /**
- * @file zoPhysicsSystem2d.cpp
+ * @file physics_system_2d.cpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
  * @brief
  * @version 0.1
@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2024
  *
  */
-#include "zoPhysicsSystem2dImpl.hpp"
-#include "./zoPysicsComponent2dImpl.hpp"
+#include "physics_system_2d_impl.hpp"
+#include "physics_component_2d_impl.hpp"
 
 namespace zo {
 

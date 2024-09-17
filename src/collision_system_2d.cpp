@@ -1,5 +1,5 @@
 /**
- * @file zoPhysicsCollisionSys2d.cpp
+ * @file collision_system_2d.cpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
  * @brief
  * @version 0.1
@@ -8,7 +8,8 @@
  * @copyright Copyright (c) 2024
  *
  */
-#include "zoPhysicsCollisionSys2dImpl.hpp"
+#include "physics_system_2d_impl.hpp"
+
 namespace zo {
 
 std::shared_ptr<CollisionSystem2d> CollisionSystem2d::create() {

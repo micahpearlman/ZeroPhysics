@@ -9,9 +9,8 @@
  *
  */
 
-#include <zoPhysicsSystem2d.hpp>
-#include <zoPhysicsComponent2d.hpp>
-#include <zoPhysicsTypes.hpp>
+// Zero Physics
+#include <zero_physics/physics_system_2d.hpp>
 
 // MonkVG OpenVG interface
 #include <MonkVG/openvg.h>

@@ -11,10 +11,10 @@
 #ifndef __zoPhysicsSystem2dImpl_h__
 #define __zoPhysicsSystem2dImpl_h__
 
-#include <zoPhysicsSystem2d.hpp>
-#include <zoPhysicsMemory.hpp>
-#include "zoPysicsComponent2dImpl.hpp"
-#include "zoPhysicsCollisionSys2dImpl.hpp"
+#include <zero_physics/physics_system_2d.hpp>
+#include <zero_physics/memory.hpp>
+#include "physics_component_2d_impl.hpp"
+#include "collision_system_2d_impl.hpp"
 
 namespace zo {
 class PhysicsSystem2dImpl : public PhysicsSystem2d {

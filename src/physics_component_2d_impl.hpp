@@ -1,5 +1,5 @@
 /**
- * @file zoPysicsComponent2dImpl.hpp
+ * @file physics_component_2d_impl.hpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
  * @brief
  * @version 0.1
@@ -11,12 +11,14 @@
 #ifndef __zoPhysicsComponent2dImpl_h__
 #define __zoPhysicsComponent2dImpl_h__
 
-#include "zoPhysicsComponent2d.hpp"
-// #include "zoPhysicsSystem2dImpl.hpp"
+#include <zero_physics/physics_component_2d.hpp>
 
 namespace zo {
+
+// forward declare
 class PhysicsSystem2dImpl;
-/// @brief A view of the Data
+
+/// @brief A view of the physics component data
 class PhysicsComponent2dImpl : public PhysicsComponent2d {
   public:
     /// @brief The data for a physics component

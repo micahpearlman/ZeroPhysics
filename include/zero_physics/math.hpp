@@ -1,5 +1,5 @@
 /**
- * @file zoPhysicsMath.hpp
+ * @file math.hpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
  * @brief
  * @version 0.1
@@ -10,7 +10,7 @@
  */
 #ifndef __zoPhysicsMath_h__
 #define __zoPhysicsMath_h__
-#include <zoPhysicsTypes.hpp>
+#include <zero_physics/types.hpp>
 #include <optional>
 
 namespace zo {

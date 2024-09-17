@@ -1,5 +1,5 @@
 /**
- * @file zoPhysicsSystem2d.hpp
+ * @file physics_system_2d.hpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
  * @brief Public phyiscs API
  * @version 0.1
@@ -10,9 +10,9 @@
  */
 #ifndef __zoPhysicsSystem2d_h__
 #define __zoPhysicsSystem2d_h__
-#include "zoPhysicsComponent2d.hpp"
-#include "zoPhysicsMemory.hpp"
-#include "zoPhysicsTypes.hpp"
+#include <zero_physics/physics_component_2d.hpp>
+#include <zero_physics/memory.hpp>
+#include <zero_physics/types.hpp>
 #include <optional>
 #include <memory>
 #include <glm/glm.hpp>

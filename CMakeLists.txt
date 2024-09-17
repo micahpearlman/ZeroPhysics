@@ -16,10 +16,10 @@ set(GLM_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm)
 
 ## ZeroPhysics
 set(ZOPHY_SOURCE_FILES
-    src/zoPhysicsSystem2d.cpp
-    src/zoPhysicsCollider2d.cpp
-    src/zoPhysicsMath.cpp
-    src/zoPhysicsComponent2d.cpp
+    src/physics_system_2d.cpp
+    src/collider_2d.cpp
+    src/math.cpp
+    src/physics_component_2d.cpp
 )
 set(ZOPHY_INCLUDE_DIRS
     ./include

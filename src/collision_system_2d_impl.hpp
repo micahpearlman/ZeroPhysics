@@ -1,5 +1,5 @@
 /**
- * @file zoPhysicsCollisionSys2dImpl.hpp
+ * @file collision_system_2d_impl.hpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
  * @brief 
  * @version 0.1
@@ -10,9 +10,9 @@
  */
 #ifndef __zoPhysicsCollisionSys2dImpl_h__
 #define __zoPhysicsCollisionSys2dImpl_h__
-#include <zoPhysicsCollisionSys2d.hpp>
-#include <zoPhysicsTypes.hpp>
-#include <zoPhysicsMemory.hpp>
+#include <zero_physics/collision_system_2d.hpp>
+#include <zero_physics/types.hpp>
+#include <zero_physics/memory.hpp>
 
 namespace zo {
 

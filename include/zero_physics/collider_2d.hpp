@@ -1,5 +1,5 @@
 /**
- * @file zoPhysicsCollider2d.hpp
+ * @file collider_2d.hpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
  * @brief 
  * @version 0.1
@@ -11,7 +11,7 @@
 #ifndef __zoPhysicsCollider2d_h__
 #define __zoPhysicsCollider2d_h__
 
-#include "zoPhysicsTypes.hpp"
+#include <zero_physics/types.hpp>
 #include <glm/glm.hpp>
 
 namespace zo {

@@ -1,5 +1,5 @@
 /**
- * @file zoPhysicsMemory.hpp
+ * @file memory.hpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
  * @brief
  * @version 0.1
