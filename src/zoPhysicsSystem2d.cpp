@@ -16,7 +16,7 @@ namespace zo {
 class PhysicsSystem2dImpl : public PhysicsSystem2d {
   public:
     /// @brief The data for a physics component
-    struct VerletComponentData {
+    struct alignas(std::max_align_t) VerletComponentData {
         glm::vec2 position = {0, 0};
         glm::vec2 prev_position = {0, 0};
         glm::vec2 acceleration = {0, 0};
@@ -28,7 +28,8 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
     /// @brief A view of the VerletComponentData
     class PhysicsComponent2dView : public PhysicsComponent2d {
       public:
-        PhysicsComponent2dView(PhysicsSystem2dImpl &sys, phy_obj_handle_2d_t hndl)
+        PhysicsComponent2dView(PhysicsSystem2dImpl &sys,
+                               phy_obj_handle_2d_t  hndl)
             : _sys(sys), _hndl(hndl) {}
 
         void  setMass(float mass) override { data().mass = mass; }
@@ -65,11 +66,13 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
         phy_obj_handle_2d_t handle() const override { return _hndl; }
 
         VerletComponentData &data() { return _sys.physicsComponent(_hndl); }
-        const VerletComponentData &data() const { return _sys.physicsComponent(_hndl); }
+        const VerletComponentData &data() const {
+            return _sys.physicsComponent(_hndl);
+        }
 
       private:
         PhysicsSystem2dImpl &_sys;
-        phy_obj_handle_2d_t     _hndl;
+        phy_obj_handle_2d_t  _hndl;
     };
 
   public:
@@ -106,7 +109,8 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
     void removeGlobalForce(force_handle_2d_t id) override {
         _global_forces.remove(id);
     }
-    std::optional<glm::vec2> getGlobalForce(force_handle_2d_t id) const override {
+    std::optional<glm::vec2>
+    getGlobalForce(force_handle_2d_t id) const override {
         return _global_forces.get(id);
     }
 

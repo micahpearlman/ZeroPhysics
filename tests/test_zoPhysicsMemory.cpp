@@ -10,6 +10,9 @@ namespace zo {
 
 struct TestComponent {
     int value;
+    // ~TestComponent() {
+    //     printf("TestComponent destructor: %d\n", value);
+    // }
 };
 
 class ComponentStoreTest : public ::testing::Test {

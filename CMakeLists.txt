@@ -3,6 +3,9 @@ project(zero_physics VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
+## configuration
+# Set CMP0077 policy to NEW
+cmake_policy(SET CMP0077 NEW)
 option(ZOPHY_BUILD_EXAMPLES "Build examples" ON)
 
 
@@ -10,19 +13,28 @@ option(ZOPHY_BUILD_EXAMPLES "Build examples" ON)
 set(GLM_ENABLE_CXX_20 ON)
 add_subdirectory(thirdparty/glm)
 set(GLM_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm)
+
+## ZeroPhysics
 set(ZOPHY_SOURCE_FILES
     src/zoPhysicsSystem2d.cpp
     src/zoPhysicsCollider2d.cpp
     src/zoPhysicsMath.cpp
 )
 set(ZOPHY_INCLUDE_DIRS
-    src
+    ./include
 )
 
 add_library(zero_physics ${ZOPHY_SOURCE_FILES})
 message(STATUS "GLM_INCLUDE_DIRS: ${GLM_INCLUDE_DIRS}")
 target_link_libraries(zero_physics glm)
-target_include_directories(zero_physics PUBLIC ${ZOPHY_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS})
+target_include_directories(zero_physics 
+    PUBLIC 
+        ${ZOPHY_INCLUDE_DIRS} 
+        ${GLM_INCLUDE_DIRS}
+    PRIVATE 
+        ./src
+)
+        
 
 if(ZOPHY_BUILD_EXAMPLES)
     add_subdirectory(examples)
