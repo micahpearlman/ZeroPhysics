@@ -10,7 +10,7 @@
  */
 #ifndef __zoPhysicsCollisionSys_hpp__
 #define __zoPhysicsCollisionSys_hpp__
-#incoud "zoPhysicsTypes.hpp"
+#include <zoPhysicsTypes.hpp>
 #include <memory>
 namespace zo {
 class CollisionSystem2d {

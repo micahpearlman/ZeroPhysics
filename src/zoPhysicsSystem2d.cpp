@@ -24,7 +24,7 @@ void PhysicsSystem2dImpl::update(float dt) {
     }
     for (int i = 0; i < _iterations; i++) {
         float iter_dt = dt / float(_iterations);
-        for (VerletComponentData &data : _physics_components) {
+        for (PhysicsComponent2dImpl::Data &data : _physics_components) {
             if (data.mass <= 0) { // static object
                 continue;
             }
@@ -57,7 +57,7 @@ const ComponentStore<glm::vec2> &PhysicsSystem2dImpl::globalForces() const {
 }
 
 phy_obj_handle_2d_t PhysicsSystem2dImpl::createPhysicsComponent() {
-    VerletComponentData data;
+    PhysicsComponent2dImpl::Data data;
     return _physics_components.add(data);
 }
 
@@ -71,32 +71,14 @@ PhysicsSystem2dImpl::getPhysicsComponentView(phy_obj_handle_2d_t hndl) {
     if (result == std::nullopt) {
         return nullptr;
     }
-    VerletComponentData &data = result->get();
-    return std::make_unique<PhysicsComponent2dView>(*this, hndl);
-    return nullptr;
+    PhysicsComponent2dImpl::Data &data = result->get();
+    return std::make_unique<PhysicsComponent2dImpl>(*this, hndl);
 }
 
 bool PhysicsSystem2dImpl::isPhysicsComponentValid(
     phy_obj_handle_2d_t hndl) const {
     return _physics_components.get(hndl) != std::nullopt;
 }
-
-//     float lastTimeStep() const { return _last_time_step; }
-
-//     ComponentStore<VerletComponentData> &physicsComponents() {
-//         return _physics_components;
-//     }
-
-//     VerletComponentData &physicsComponent(phy_obj_handle_2d_t hndl) {
-//         return _physics_components.get(hndl)->get();
-//     }
-
-//   protected:
-//     float                               _last_time_step = 1 / 60.0f;
-//     int                                 _iterations = 1;
-//     ComponentStore<glm::vec2>           _global_forces;
-//     ComponentStore<VerletComponentData> _physics_components;
-// };
 
 std::shared_ptr<PhysicsSystem2d> PhysicsSystem2d::create(int iterations) {
     PhysicsSystem2dImpl *impl = new PhysicsSystem2dImpl(iterations);

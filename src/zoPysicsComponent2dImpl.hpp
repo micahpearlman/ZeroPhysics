@@ -12,13 +12,25 @@
 #define __zoPhysicsComponent2dImpl_h__
 
 #include "zoPhysicsComponent2d.hpp"
-#include "zoPhysicsSystem2dImpl.hpp"
+// #include "zoPhysicsSystem2dImpl.hpp"
 
 namespace zo {
-/// @brief A view of the VerletComponentData
-class PhysicsComponent2dView : public PhysicsComponent2d {
+class PhysicsSystem2dImpl;
+/// @brief A view of the Data
+class PhysicsComponent2dImpl : public PhysicsComponent2d {
   public:
-    PhysicsComponent2dView(PhysicsSystem2dImpl &sys, phy_obj_handle_2d_t hndl);
+    /// @brief The data for a physics component
+    struct alignas(std::max_align_t) Data {
+        glm::vec2 position = {0, 0};
+        glm::vec2 prev_position = {0, 0};
+        glm::vec2 acceleration = {0, 0};
+        glm::vec2 force = {0, 0};
+
+        float mass = 1;
+    };
+
+  public:
+    PhysicsComponent2dImpl(PhysicsSystem2dImpl &sys, phy_obj_handle_2d_t hndl);
 
     void                setMass(float mass) override;
     float               mass() const override;
@@ -35,8 +47,8 @@ class PhysicsComponent2dView : public PhysicsComponent2d {
     bool                isStatic() const override;
     phy_obj_handle_2d_t handle() const override;
 
-    PhysicsSystem2dImpl::VerletComponentData       &data();
-    const PhysicsSystem2dImpl::VerletComponentData &data() const;
+    PhysicsComponent2dImpl::Data       &data();
+    const PhysicsComponent2dImpl::Data &data() const;
 
   private:
     PhysicsSystem2dImpl &_sys;

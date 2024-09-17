@@ -91,7 +91,7 @@ template <typename T> class MemoryPool {
      * @param ptr A pointer to the object to deallocate.
      */
     void deallocate(T *ptr) {
-        int idx = reinterpret_cast<MemoryPoolElement*>(ptr) - &_pool.front();
+        int idx = reinterpret_cast<MemoryPoolElement *>(ptr) - &_pool.front();
         if (idx > _pool_size || idx < 0) {
             return; // out of bounds
         }

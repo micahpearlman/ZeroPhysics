@@ -12,21 +12,13 @@
 #define __zoPhysicsSystem2dImpl_h__
 
 #include <zoPhysicsSystem2d.hpp>
-#include "zoPhysicsMemory.hpp"
+#include <zoPhysicsMemory.hpp>
+#include "zoPysicsComponent2dImpl.hpp"
+#include "zoPhysicsCollisionSys2dImpl.hpp"
 
 namespace zo {
 class PhysicsSystem2dImpl : public PhysicsSystem2d {
   public:
-    /// @brief The data for a physics component
-    struct alignas(std::max_align_t) VerletComponentData {
-        glm::vec2 position = {0, 0};
-        glm::vec2 prev_position = {0, 0};
-        glm::vec2 acceleration = {0, 0};
-        glm::vec2 force = {0, 0};
-
-        float mass = 1;
-    };
-
     PhysicsSystem2dImpl(float iterations);
     virtual ~PhysicsSystem2dImpl() = default;
 
@@ -46,19 +38,24 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
   public:
     float lastTimeStep() const { return _last_time_step; }
 
-    ComponentStore<VerletComponentData> &physicsComponents() {
+    ComponentStore<PhysicsComponent2dImpl::Data> &
+    physicsComponents() {
         return _physics_components;
     }
 
-    VerletComponentData &physicsComponent(phy_obj_handle_2d_t hndl) {
+    PhysicsComponent2dImpl::Data &
+    physicsComponent(phy_obj_handle_2d_t hndl) {
         return _physics_components.get(hndl)->get();
     }
 
   private:
-    float                               _last_time_step = 1 / 60.0f;
-    int                                 _iterations = 1;
-    ComponentStore<glm::vec2>           _global_forces;
-    ComponentStore<VerletComponentData> _physics_components;
+    float                     _last_time_step = 1 / 60.0f;
+    int                       _iterations = 1;
+    ComponentStore<glm::vec2> _global_forces;
+    ComponentStore<PhysicsComponent2dImpl::Data>
+        _physics_components;
+
+    std::shared_ptr<CollisionSystem2dImpl> _collision_system;
 };
 
 } // namespace zo
