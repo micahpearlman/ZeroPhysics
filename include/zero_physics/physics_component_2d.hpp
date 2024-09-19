@@ -12,7 +12,11 @@
 #define __zoPhysicsComponent2d_h__
 #include <zero_physics/types.hpp>
 #include <glm/glm.hpp>
+#include <memory>
 namespace zo {
+class PhysicsSystem2d;
+/// @brief Interface for a 2d physics component. This is a view into the physics
+/// component data which is managed by the physics system.
 class PhysicsComponent2d {
 
   public:
@@ -31,6 +35,8 @@ class PhysicsComponent2d {
     virtual void                setStatic(bool isStatic) = 0;
     virtual bool                isStatic() const = 0;
     virtual phy_obj_handle_2d_t handle() const = 0;
+
+    static std::unique_ptr<PhysicsComponent2d> create(PhysicsSystem2d& physics_system, phy_obj_handle_2d_t hndl);
 };
 } // namespace zo
 #endif // __zoPhysicsComponent2d_h__

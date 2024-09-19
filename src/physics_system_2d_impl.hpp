@@ -32,8 +32,6 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
     void destroyPhysicsComponent(phy_obj_handle_2d_t hndl) override;
     bool isPhysicsComponentValid(phy_obj_handle_2d_t hndl) const override;
 
-    std::unique_ptr<PhysicsComponent2d>
-    getPhysicsComponentView(phy_obj_handle_2d_t hndl) override;
 
   public:
     float lastTimeStep() const { return _last_time_step; }

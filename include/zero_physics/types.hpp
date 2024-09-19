@@ -38,6 +38,7 @@ struct ray_2d_t {
     glm::vec2 direction;
 };
 
+
 struct contact_2d_t {
     glm::vec2 normal;
     glm::vec2 point;

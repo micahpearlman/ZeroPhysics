@@ -4,7 +4,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "zoPhysicsMemory.hpp"
+#include <zero_physics/memory.hpp>
 
 namespace zo {
 
@@ -147,6 +147,24 @@ TEST_F(MemoryPoolTest, UseAsStdAllocator) {
     EXPECT_EQ(vec[0].value, 42);
     EXPECT_EQ(vec[1].value, 84);
 }
+
+TEST_F(MemoryPoolTest, PtrToIdx) {
+        auto *component = pool.allocate();
+        ASSERT_NE(component, nullptr);
+        size_t idx = pool.ptrToIdx(component);
+        EXPECT_EQ(component, pool.idxToPtr(idx));
+        pool.deallocate(component);
+}
+
+TEST_F(MemoryPoolTest, IdxToPtr) {
+        auto *component = pool.allocate();
+        ASSERT_NE(component, nullptr);
+        size_t idx = pool.ptrToIdx(component);
+        auto *retrieved_component = pool.idxToPtr(idx);
+        EXPECT_EQ(component, retrieved_component);
+        pool.deallocate(component);
+}
+
 
 } // namespace zo
 

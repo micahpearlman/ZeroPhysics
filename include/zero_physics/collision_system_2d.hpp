@@ -11,23 +11,18 @@
 #ifndef __zoPhysicsCollisionSys_hpp__
 #define __zoPhysicsCollisionSys_hpp__
 #include <zero_physics/types.hpp>
+#include <zero_physics/collider_2d.hpp>
 #include <memory>
 namespace zo {
 class CollisionSystem2d {
 public:
-    // collider enum
-    enum class ColliderType {
-        CIRCLE,
-        LINE,
-        BOX
-    };
 
     
     static std::shared_ptr<CollisionSystem2d> create();
 
     virtual ~CollisionSystem2d() = default;
 
-    virtual collider_handle_2d_t createCollider(ColliderType type) = 0;
+    virtual collider_handle_2d_t createCollider(Collider2d::ColliderType type) = 0;
 };
 
 }

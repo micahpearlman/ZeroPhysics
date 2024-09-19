@@ -18,7 +18,7 @@
 namespace zo {
 
 /**
- * @brief A fast memory pool.
+ * @brief A O(1) create/destroy memory pool.
  *
  * @tparam T The type of object to allocate.
  */
@@ -91,7 +91,7 @@ template <typename T> class MemoryPool {
      * @param ptr A pointer to the object to deallocate.
      */
     void deallocate(T *ptr) {
-        int idx = reinterpret_cast<MemoryPoolElement *>(ptr) - &_pool.front();
+        size_t idx = ptrToIdx(ptr);
         if (idx > _pool_size || idx < 0) {
             return; // out of bounds
         }
@@ -137,6 +137,24 @@ template <typename T> class MemoryPool {
      */
     template <typename U> void destroy(U *ptr) { ptr->~U(); }
 
+    /**
+     * @brief Get the index of the object in the memory pool.
+     *
+     * @param ptr A pointer to the object.
+     * @return size_t The index of the object in the memory pool.
+     */
+    size_t ptrToIdx(T *ptr) {
+        return reinterpret_cast<MemoryPoolElement *>(ptr) - &_pool.front();
+    }
+
+    /**
+     * @brief Get the object at the given index.
+     *
+     * @param idx The index of the object.
+     * @return T* A pointer to the object.
+     */
+    T *idxToPtr(size_t idx) { return &_pool[idx].object; }
+
   private:
     union alignas(std::max_align_t) MemoryPoolElement {
         T      object;
@@ -154,7 +172,9 @@ template <typename T> class MemoryPool {
  * @brief A component store that uses a vector to store components and a map to
  * store the handle to index mapping. This is intended to be be an efficient way
  * to store components as it provides data locality and O(1) access to
- * components. Adding and removing components is O(1) as well.
+ * components. Adding and removing components is O(1) as well. 
+ * Use this when you need to store a large number of components and iterate over
+ * them sequentially.
  *
  * @tparam T The type of component to store.
  */

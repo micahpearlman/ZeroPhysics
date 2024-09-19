@@ -1,12 +1,12 @@
 /**
  * @file physics_component_2d.cpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2024-09-17
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 #include "physics_component_2d_impl.hpp"
 #include "physics_system_2d_impl.hpp"
@@ -56,9 +56,15 @@ PhysicsComponent2dImpl::Data &PhysicsComponent2dImpl::data() {
     return _sys.physicsComponent(_hndl);
 }
 
-const PhysicsComponent2dImpl::Data &
-PhysicsComponent2dImpl::data() const {
+const PhysicsComponent2dImpl::Data &PhysicsComponent2dImpl::data() const {
     return _sys.physicsComponent(_hndl);
+}
+
+std::unique_ptr<PhysicsComponent2d>
+PhysicsComponent2d::create(PhysicsSystem2d    &physics_system,
+                               phy_obj_handle_2d_t hndl) {
+    return std::make_unique<PhysicsComponent2dImpl>(
+        static_cast<PhysicsSystem2dImpl &>(physics_system), hndl);
 }
 
 } // namespace zo

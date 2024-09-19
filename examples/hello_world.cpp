@@ -28,6 +28,9 @@
 
 // System
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <iomanip>
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
@@ -137,13 +140,13 @@ int main(int argc, char **argv) {
 
     /// initialize the physics system
     std::shared_ptr<zo::PhysicsSystem2d> physics_system =
-        zo::PhysicsSystem2d::create(1);
+        zo::PhysicsSystem2d::create(1024, 1);
 
     // create a physics object
     zo::phy_obj_handle_2d_t phy_obj_hndl =
         physics_system->createPhysicsComponent();
-    std::unique_ptr<zo::PhysicsComponent2d> phy_obj =
-        physics_system->getPhysicsComponentView(phy_obj_hndl);
+    
+    std::unique_ptr<zo::PhysicsComponent2d> phy_obj = zo::PhysicsComponent2d::create(*physics_system, phy_obj_hndl);
     phy_obj->setPosition({100, 100});
 
     physics_system->addGlobalForce({0, 9.8f});
@@ -158,7 +161,7 @@ int main(int argc, char **argv) {
     // create a floor physics object and render object
     zo::phy_obj_handle_2d_t floor_hndl =
         physics_system->createPhysicsComponent();
-    std::unique_ptr<zo::PhysicsComponent2d> floor = physics_system->getPhysicsComponentView(floor_hndl);
+    std::unique_ptr<zo::PhysicsComponent2d> floor = zo::PhysicsComponent2d::create(*physics_system, floor_hndl);
     floor->setMass(-1.0f);  // infinite mass
     // floor->setPosition({0, 200});
     // floor->setStatic(true);  // TODO: FIXME: this is not working
@@ -222,10 +225,12 @@ int main(int argc, char **argv) {
             double fps = (double)frame_count / elapsed_seconds;
             double ms_per_frame = 1000.0 / fps;
 
-            char tmp[128];
-            sprintf(tmp, "Zero Physics Hello World - %.2f ms/frame (%.1f FPS)",
-                    ms_per_frame, fps);
-            glfwSetWindowTitle(window, tmp);
+
+            std::stringstream ss;
+            ss << "Zero Physics Hello World - " << std::fixed << std::setprecision(2) 
+               << ms_per_frame << " ms/frame (" << std::setprecision(1) << fps << " FPS)";
+            std::string title = ss.str();
+            glfwSetWindowTitle(window, title.c_str());
             frame_count = 0;
             // std::cout << ms_per_frame << " ms/frame (" << fps << " FPS)\n";
         }

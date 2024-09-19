@@ -65,22 +65,13 @@ void PhysicsSystem2dImpl::destroyPhysicsComponent(phy_obj_handle_2d_t hndl) {
     _physics_components.remove(hndl);
 }
 
-std::unique_ptr<PhysicsComponent2d>
-PhysicsSystem2dImpl::getPhysicsComponentView(phy_obj_handle_2d_t hndl) {
-    auto result = _physics_components.get(hndl);
-    if (result == std::nullopt) {
-        return nullptr;
-    }
-    PhysicsComponent2dImpl::Data &data = result->get();
-    return std::make_unique<PhysicsComponent2dImpl>(*this, hndl);
-}
 
 bool PhysicsSystem2dImpl::isPhysicsComponentValid(
     phy_obj_handle_2d_t hndl) const {
     return _physics_components.get(hndl) != std::nullopt;
 }
 
-std::shared_ptr<PhysicsSystem2d> PhysicsSystem2d::create(int iterations) {
+std::shared_ptr<PhysicsSystem2d> PhysicsSystem2d::create(size_t max_num_objects, int iterations) {
     PhysicsSystem2dImpl *impl = new PhysicsSystem2dImpl(iterations);
     return std::shared_ptr<PhysicsSystem2d>(impl);
 }

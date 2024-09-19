@@ -1,7 +1,7 @@
 /**
  * @file physics_system_2d.hpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
- * @brief Public phyiscs API
+ * @brief Public physics API
  * @version 0.1
  * @date 2024-09-09
  *
@@ -22,9 +22,10 @@ class PhysicsSystem2d {
   public:
     virtual ~PhysicsSystem2d() = default;
     /// @brief create a physics system
+    /// @param max_num_objects maximum number of physics objects
     /// @param iterations number of iterations to perform per update time step
     /// @return the physics system
-    static std::shared_ptr<PhysicsSystem2d> create(int iterations);
+    static std::shared_ptr<PhysicsSystem2d> create(size_t max_num_objects, int iterations);
 
     /// @brief  Update the physics system.
     /// @param dt The time step to update the physics system by.
@@ -58,10 +59,6 @@ class PhysicsSystem2d {
     /// @param hndl The handle to the physics object to destroy.
     virtual void               destroyPhysicsComponent(phy_obj_handle_2d_t hndl) = 0;
 
-    /// @brief Get the view of the internal physics component for the given physics object handle.
-    /// @param hndl The handle to the physics object.
-    /// @return PhysicsComponent2d a view of the physics component.
-    virtual std::unique_ptr<PhysicsComponent2d> getPhysicsComponentView(phy_obj_handle_2d_t hndl) = 0;
 
     /// @brief Check if the physics object handle is valid.
     /// @param hndl The handle to the physics object.
