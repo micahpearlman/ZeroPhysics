@@ -36,7 +36,6 @@ class PhysicsObject2d {
     virtual bool                isStatic() const = 0;
     virtual phy_obj_handle_2d_t handle() const = 0;
 
-    static std::unique_ptr<PhysicsObject2d> create(PhysicsSystem2d& physics_system, phy_obj_handle_2d_t hndl);
 };
 } // namespace zo
 #endif // __zo_physics_object_h__

@@ -143,10 +143,7 @@ int main(int argc, char **argv) {
         zo::PhysicsSystem2d::create(1024, 1);
 
     // create a physics object
-    zo::phy_obj_handle_2d_t phy_obj_hndl =
-        physics_system->createPhysicsObject();
-    
-    std::unique_ptr<zo::PhysicsObject2d> phy_obj = zo::PhysicsObject2d::create(*physics_system, phy_obj_hndl);
+    std::unique_ptr<zo::PhysicsObject2d> phy_obj = physics_system->createPhysicsObject();
     phy_obj->setPosition({100, 100});
 
     physics_system->addGlobalForce({0, 9.8f});
@@ -159,9 +156,7 @@ int main(int argc, char **argv) {
 
     // FIXME:  this is not working ~V BELOW ~V
     // create a floor physics object and render object
-    zo::phy_obj_handle_2d_t floor_hndl =
-        physics_system->createPhysicsObject();
-    std::unique_ptr<zo::PhysicsObject2d> floor = zo::PhysicsObject2d::create(*physics_system, floor_hndl);
+    std::unique_ptr<zo::PhysicsObject2d> floor = physics_system->createPhysicsObject();
     floor->setMass(-1.0f);  // infinite mass
     // floor->setPosition({0, 200});
     // floor->setStatic(true);  // TODO: FIXME: this is not working

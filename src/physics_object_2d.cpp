@@ -44,7 +44,7 @@ glm::vec2 PhysicsObject2dImpl::acceleration() const {
 void PhysicsObject2dImpl::addForce(const glm::vec2 &f) { data().force += f; }
 void PhysicsObject2dImpl::zeroForce() { data().force = glm::vec2(0); }
 bool PhysicsObject2dImpl::isValid() const {
-    return _sys.isPhysicsObjectValid(_hndl);
+    return _sys.isPhysicsHandleValid(_hndl);
 }
 void PhysicsObject2dImpl::setStatic(bool is_static) {
     setMass(is_static ? -1.0f : 1.0f);
@@ -60,11 +60,5 @@ const PhysicsObject2dImpl::Data &PhysicsObject2dImpl::data() const {
     return _sys.physicsComponent(_hndl);
 }
 
-std::unique_ptr<PhysicsObject2d>
-PhysicsObject2d::create(PhysicsSystem2d    &physics_system,
-                               phy_obj_handle_2d_t hndl) {
-    return std::make_unique<PhysicsObject2dImpl>(
-        static_cast<PhysicsSystem2dImpl &>(physics_system), hndl);
-}
 
 } // namespace zo

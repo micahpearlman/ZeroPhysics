@@ -61,24 +61,20 @@ const ComponentStore<glm::vec2> &PhysicsSystem2dImpl::globalForces() const {
     return _global_forces;
 }
 
-phy_obj_handle_2d_t PhysicsSystem2dImpl::createPhysicsObject() {
+std::unique_ptr<PhysicsObject2d>  PhysicsSystem2dImpl::createPhysicsObject() {
     PhysicsObject2dImpl::Data data;
-    return _physics_objects.add(data);
+    phy_obj_handle_2d_t hndl = _physics_objects.add(data);
+    return std::make_unique<PhysicsObject2dImpl>(*this, hndl);
 }
 
-void PhysicsSystem2dImpl::destroyPhysicsObject(phy_obj_handle_2d_t hndl) {
-    _physics_objects.remove(hndl);
-}
-
-
-bool PhysicsSystem2dImpl::isPhysicsObjectValid(
-    phy_obj_handle_2d_t hndl) const {
-    return _physics_objects.get(hndl) != std::nullopt;
-}
 
 std::shared_ptr<PhysicsSystem2d> PhysicsSystem2d::create(size_t max_num_objects, int iterations) {
     PhysicsSystem2dImpl *impl = new PhysicsSystem2dImpl(max_num_objects, iterations);
     return std::shared_ptr<PhysicsSystem2d>(impl);
+}
+
+bool PhysicsSystem2dImpl::isPhysicsHandleValid(phy_obj_handle_2d_t hndl) const {
+    return _physics_objects.get(hndl).has_value();
 }
 
 } // namespace zo

@@ -54,16 +54,10 @@ class PhysicsSystem2d {
 
     /// @brief Create a physics object.
     /// @return a handle to the physics object
-    virtual phy_obj_handle_2d_t createPhysicsObject() = 0;
+    virtual std::unique_ptr<PhysicsObject2d> createPhysicsObject() = 0;
 
-    /// @brief Destroy a physics object.
-    /// @param hndl The handle to the physics object to destroy.
-    virtual void destroyPhysicsObject(phy_obj_handle_2d_t hndl) = 0;
+    virtual bool isPhysicsHandleValid(phy_obj_handle_2d_t hndl) const = 0;
 
-    /// @brief Check if the physics object handle is valid.
-    /// @param hndl The handle to the physics object.
-    /// @return bool true if the physics object handle is valid.
-    virtual bool isPhysicsObjectValid(phy_obj_handle_2d_t hndl) const = 0;
 };
 } // namespace zo
 
