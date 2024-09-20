@@ -10,7 +10,7 @@
  */
 #ifndef __zoPhysicsSystem2d_h__
 #define __zoPhysicsSystem2d_h__
-#include <zero_physics/physics_component_2d.hpp>
+#include <zero_physics/physics_object_2d.hpp>
 #include <zero_physics/memory.hpp>
 #include <zero_physics/types.hpp>
 #include <optional>
@@ -25,14 +25,15 @@ class PhysicsSystem2d {
     /// @param max_num_objects maximum number of physics objects
     /// @param iterations number of iterations to perform per update time step
     /// @return the physics system
-    static std::shared_ptr<PhysicsSystem2d> create(size_t max_num_objects, int iterations);
+    static std::shared_ptr<PhysicsSystem2d> create(size_t max_num_objects,
+                                                   int    iterations);
 
     /// @brief  Update the physics system.
     /// @param dt The time step to update the physics system by.
     virtual void update(float dt) = 0;
 
     /// @brief  Add a global force to the physics system.
-    //         This force will be applied to all physics components.
+    //         This force will be applied to all physics objects.
     /// @param force
     /// @return
     virtual force_handle_2d_t addGlobalForce(const glm::vec2 &force) = 0;
@@ -53,20 +54,16 @@ class PhysicsSystem2d {
 
     /// @brief Create a physics object.
     /// @return a handle to the physics object
-    virtual phy_obj_handle_2d_t   createPhysicsComponent() = 0;
+    virtual phy_obj_handle_2d_t createPhysicsObject() = 0;
 
     /// @brief Destroy a physics object.
     /// @param hndl The handle to the physics object to destroy.
-    virtual void               destroyPhysicsComponent(phy_obj_handle_2d_t hndl) = 0;
-
+    virtual void destroyPhysicsObject(phy_obj_handle_2d_t hndl) = 0;
 
     /// @brief Check if the physics object handle is valid.
     /// @param hndl The handle to the physics object.
     /// @return bool true if the physics object handle is valid.
-    virtual bool isPhysicsComponentValid(phy_obj_handle_2d_t hndl) const = 0;
-
-
-
+    virtual bool isPhysicsObjectValid(phy_obj_handle_2d_t hndl) const = 0;
 };
 } // namespace zo
 

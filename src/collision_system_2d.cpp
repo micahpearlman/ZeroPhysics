@@ -12,17 +12,19 @@
 
 namespace zo {
 
-std::shared_ptr<CollisionSystem2d> CollisionSystem2d::create() {
-    return std::make_shared<CollisionSystem2dImpl>();
+CollisionSystem2dImpl::CollisionSystem2dImpl(size_t max_colliders)
+    : _collider_data_pool(max_colliders) {}
+
+std::shared_ptr<CollisionSystem2d> CollisionSystem2d::create(size_t max_colliders) {
+    return std::make_shared<CollisionSystem2dImpl>(max_colliders);
 }
 
-collider_handle_2d_t CollisionSystem2dImpl::createCollider(ColliderType type) {
-    switch (type)
-    {
-    case ColliderType::CIRCLE:
+collider_handle_2d_t CollisionSystem2dImpl::createCollider(Collider2d::ColliderType type) {
+    switch (type) {
+    case  Collider2d::ColliderType::CIRCLE:
         /* code */
         break;
-    
+
     default:
         break;
     }

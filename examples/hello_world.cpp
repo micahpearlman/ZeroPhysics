@@ -41,7 +41,7 @@ class GameObject {
     VGPaint _fill_paint;
     VGPaint _stroke_paint;
 
-    std::unique_ptr<zo::PhysicsComponent2d> _phy_obj;
+    std::unique_ptr<zo::PhysicsObject2d> _phy_obj;
     std::shared_ptr<zo::PhysicsSystem2d>    _physics_system;
 
   public:
@@ -71,7 +71,7 @@ class GameObject {
     }
 
     // get physics object
-    zo::PhysicsComponent2d *physicsObject() { return _phy_obj.get(); }
+    zo::PhysicsObject2d *physicsObject() { return _phy_obj.get(); }
 };
 
 int main(int argc, char **argv) {
@@ -144,9 +144,9 @@ int main(int argc, char **argv) {
 
     // create a physics object
     zo::phy_obj_handle_2d_t phy_obj_hndl =
-        physics_system->createPhysicsComponent();
+        physics_system->createPhysicsObject();
     
-    std::unique_ptr<zo::PhysicsComponent2d> phy_obj = zo::PhysicsComponent2d::create(*physics_system, phy_obj_hndl);
+    std::unique_ptr<zo::PhysicsObject2d> phy_obj = zo::PhysicsObject2d::create(*physics_system, phy_obj_hndl);
     phy_obj->setPosition({100, 100});
 
     physics_system->addGlobalForce({0, 9.8f});
@@ -160,8 +160,8 @@ int main(int argc, char **argv) {
     // FIXME:  this is not working ~V BELOW ~V
     // create a floor physics object and render object
     zo::phy_obj_handle_2d_t floor_hndl =
-        physics_system->createPhysicsComponent();
-    std::unique_ptr<zo::PhysicsComponent2d> floor = zo::PhysicsComponent2d::create(*physics_system, floor_hndl);
+        physics_system->createPhysicsObject();
+    std::unique_ptr<zo::PhysicsObject2d> floor = zo::PhysicsObject2d::create(*physics_system, floor_hndl);
     floor->setMass(-1.0f);  // infinite mass
     // floor->setPosition({0, 200});
     // floor->setStatic(true);  // TODO: FIXME: this is not working

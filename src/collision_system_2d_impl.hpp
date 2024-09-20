@@ -19,12 +19,17 @@ namespace zo {
 
 class CollisionSystem2dImpl : public CollisionSystem2d {
   public:
-    static std::shared_ptr<CollisionSystem2d> create();
+    CollisionSystem2dImpl(size_t max_colliders);
+    ~CollisionSystem2dImpl() = default;
+
     virtual collider_handle_2d_t
     createCollider(Collider2d::ColliderType type) override;
 
+    
+
   private:
-    using ColliderDataVariant = std::variant<CircleCollider2dImpl::Data, LineCollider2dImpl::Data>;
+    using ColliderDataVariant =
+        std::variant<CircleCollider2dImpl::Data, LineCollider2dImpl::Data>;
     MemoryPool<ColliderDataVariant> _collider_data_pool;
 };
 

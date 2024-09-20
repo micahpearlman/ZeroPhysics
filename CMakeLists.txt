@@ -18,8 +18,9 @@ set(GLM_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm)
 set(ZOPHY_SOURCE_FILES
     src/physics_system_2d.cpp
     src/collider_2d.cpp
+    src/collision_system_2d.cpp
     src/math.cpp
-    src/physics_component_2d.cpp
+    src/physics_object_2d.cpp
 )
 set(ZOPHY_INCLUDE_DIRS
     ./include

@@ -1,5 +1,5 @@
 /**
- * @file physics_component_2d.hpp
+ * @file physics_object_2d.hpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
  * @brief
  * @version 0.1
@@ -8,19 +8,19 @@
  * @copyright Copyright (c) 2024
  *
  */
-#ifndef __zoPhysicsComponent2d_h__
-#define __zoPhysicsComponent2d_h__
+#ifndef __zo_physics_object_h__
+#define __zo_physics_object_h__
 #include <zero_physics/types.hpp>
 #include <glm/glm.hpp>
 #include <memory>
 namespace zo {
 class PhysicsSystem2d;
-/// @brief Interface for a 2d physics component. This is a view into the physics
-/// component data which is managed by the physics system.
-class PhysicsComponent2d {
+/// @brief Interface for a 2d physics object. This is a view into the physics
+/// object data which is managed by the physics system.
+class PhysicsObject2d {
 
   public:
-    virtual ~PhysicsComponent2d() = default;
+    virtual ~PhysicsObject2d() = default;
     virtual void                setMass(float mass) = 0;
     virtual float               mass() const = 0;
     virtual void                setPosition(const glm::vec2 &p) = 0;
@@ -36,7 +36,7 @@ class PhysicsComponent2d {
     virtual bool                isStatic() const = 0;
     virtual phy_obj_handle_2d_t handle() const = 0;
 
-    static std::unique_ptr<PhysicsComponent2d> create(PhysicsSystem2d& physics_system, phy_obj_handle_2d_t hndl);
+    static std::unique_ptr<PhysicsObject2d> create(PhysicsSystem2d& physics_system, phy_obj_handle_2d_t hndl);
 };
 } // namespace zo
-#endif // __zoPhysicsComponent2d_h__
+#endif // __zo_physics_object_h__

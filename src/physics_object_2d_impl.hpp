@@ -1,5 +1,5 @@
 /**
- * @file physics_component_2d_impl.hpp
+ * @file physics_object_2d_impl.hpp
  * @author Micah Pearlman (micahpearlman@gmail.com)
  * @brief
  * @version 0.1
@@ -8,20 +8,20 @@
  * @copyright Copyright (c) 2024
  *
  */
-#ifndef __zoPhysicsComponent2dImpl_h__
-#define __zoPhysicsComponent2dImpl_h__
+#ifndef __zo_physics_object_2d_impl_h__
+#define __zo_physics_object_2d_impl_h__
 
-#include <zero_physics/physics_component_2d.hpp>
+#include <zero_physics/physics_object_2d.hpp>
 
 namespace zo {
 
 // forward declare
 class PhysicsSystem2dImpl;
 
-/// @brief A view of the physics component data
-class PhysicsComponent2dImpl : public PhysicsComponent2d {
+/// @brief A view of the physics object data
+class PhysicsObject2dImpl : public PhysicsObject2d {
   public:
-    /// @brief The data for a physics component
+    /// @brief The data for a physics object
     struct alignas(std::max_align_t) Data {
         glm::vec2 position = {0, 0};
         glm::vec2 prev_position = {0, 0};
@@ -32,7 +32,7 @@ class PhysicsComponent2dImpl : public PhysicsComponent2d {
     };
 
   public:
-    PhysicsComponent2dImpl(PhysicsSystem2dImpl &sys, phy_obj_handle_2d_t hndl);
+    PhysicsObject2dImpl(PhysicsSystem2dImpl &sys, phy_obj_handle_2d_t hndl);
 
     void                setMass(float mass) override;
     float               mass() const override;
@@ -49,8 +49,8 @@ class PhysicsComponent2dImpl : public PhysicsComponent2d {
     bool                isStatic() const override;
     phy_obj_handle_2d_t handle() const override;
 
-    PhysicsComponent2dImpl::Data       &data();
-    const PhysicsComponent2dImpl::Data &data() const;
+    PhysicsObject2dImpl::Data       &data();
+    const PhysicsObject2dImpl::Data &data() const;
 
   private:
     PhysicsSystem2dImpl &_sys;
@@ -59,4 +59,4 @@ class PhysicsComponent2dImpl : public PhysicsComponent2d {
 
 } // namespace zo
 
-#endif // __zoPhysicsComponent2dImpl_h__
+#endif // __zo_physics_object_2d_impl_h__
