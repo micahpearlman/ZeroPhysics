@@ -25,7 +25,7 @@ public:
 
     virtual ~CollisionSystem2d() = default;
 
-    virtual collider_handle_2d_t createCollider(Collider2d::ColliderType type) = 0;
+    virtual std::unique_ptr<Collider2d> createCollider(Collider2d::ColliderType type) = 0;
 };
 
 }

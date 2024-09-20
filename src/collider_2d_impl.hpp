@@ -33,7 +33,7 @@ class Collider2dImpl : virtual public Collider2d {
 
   public:
     Collider2dImpl(CollisionSystem2dImpl &collision_system,
-                   collider_handle_2d_t handle, ColliderType type);
+                   collider_handle_2d_t handle);
     virtual ~Collider2dImpl() = default;
     void  setSensor(bool isSensor) override;
     bool  isSensor() const override;
@@ -44,11 +44,16 @@ class Collider2dImpl : virtual public Collider2d {
     void  setFilter(uint16_t categoryBits, uint16_t maskBits) override;
     void  getFilter(uint16_t &categoryBits, uint16_t &maskBits) const override;
     collider_handle_2d_t handle() const override;
-    ColliderType         type() const override;
 
-  private:
-    Data       &data();
-    const Data &data() const;
+    CollisionSystem2dImpl& system() { return _sys; }
+
+  protected:
+    virtual Collider2dImpl::Data       &baseData() = 0;
+    virtual const Collider2dImpl::Data &baseData() const = 0;
+
+
+
+
 };
 
 class CircleCollider2dImpl : public Collider2dImpl, public CircleCollider2d {
@@ -59,7 +64,7 @@ class CircleCollider2dImpl : public Collider2dImpl, public CircleCollider2d {
 
   public:
     CircleCollider2dImpl(CollisionSystem2dImpl &collision_system,
-                         collider_handle_2d_t handle, circle_2d_t circle);
+                         collider_handle_2d_t handle);
     virtual ~CircleCollider2dImpl() = default;
     void        setRadius(float radius) override;
     float       radius() const override;
@@ -67,6 +72,16 @@ class CircleCollider2dImpl : public Collider2dImpl, public CircleCollider2d {
     glm::vec2   center() const override;
     void        setCircle(const circle_2d_t &circle) override;
     circle_2d_t circle() const override;
+
+    Collider2dImpl::Data       &baseData() override;
+    const Collider2dImpl::Data &baseData() const override;
+
+    CircleCollider2dImpl::Data& data() { return _data; }
+    CircleCollider2dImpl::Data const& data() const { return _data; }
+
+  private:
+    CircleCollider2dImpl::Data& _data;
+
 };
 
 class LineCollider2dImpl : public Collider2dImpl, public LineCollider2d {

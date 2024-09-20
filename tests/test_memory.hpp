@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include <zero_physics/memory.hpp>
 
-namespace zo {
+using namespace zo;
 
 struct TestComponent {
     int value;
@@ -166,9 +166,4 @@ TEST_F(MemoryPoolTest, IdxToPtr) {
 }
 
 
-} // namespace zo
 
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

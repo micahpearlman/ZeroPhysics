@@ -44,6 +44,8 @@ class CircleCollider2d : virtual public Collider2d {
     virtual glm::vec2   center() const = 0;
     virtual void        setCircle(const circle_2d_t &circle) = 0;
     virtual circle_2d_t circle() const = 0;
+
+    ColliderType type() const override { return ColliderType::CIRCLE; } 
 };
 
 class LineCollider2d : virtual public Collider2d {

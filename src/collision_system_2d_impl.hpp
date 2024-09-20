@@ -22,11 +22,14 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
     CollisionSystem2dImpl(size_t max_colliders);
     ~CollisionSystem2dImpl() = default;
 
-    virtual collider_handle_2d_t
+    std::unique_ptr<Collider2d>
     createCollider(Collider2d::ColliderType type) override;
 
-    
-
+    template <typename T>
+    T &getColliderData(collider_handle_2d_t hndl) {
+        ColliderDataVariant* data_variant = _collider_data_pool.idxToPtr(hndl);
+        return std::get<T>(*data_variant);
+    }
   private:
     using ColliderDataVariant =
         std::variant<CircleCollider2dImpl::Data, LineCollider2dImpl::Data>;

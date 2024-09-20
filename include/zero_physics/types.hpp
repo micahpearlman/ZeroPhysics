@@ -16,7 +16,7 @@ namespace zo {
 // handles
 using force_handle_2d_t = uint64_t;
 using phy_obj_handle_2d_t = uint64_t;
-using collider_handle_2d_t = uint64_t;
+using collider_handle_2d_t = size_t;
 
 struct line_segment_2d_t {
     glm::vec2 start;

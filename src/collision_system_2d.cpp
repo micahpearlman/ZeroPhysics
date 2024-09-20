@@ -19,15 +19,29 @@ std::shared_ptr<CollisionSystem2d> CollisionSystem2d::create(size_t max_collider
     return std::make_shared<CollisionSystem2dImpl>(max_colliders);
 }
 
-collider_handle_2d_t CollisionSystem2dImpl::createCollider(Collider2d::ColliderType type) {
+std::unique_ptr<Collider2d> CollisionSystem2dImpl::createCollider(Collider2d::ColliderType type) {
     switch (type) {
     case  Collider2d::ColliderType::CIRCLE:
+        {
+            ColliderDataVariant* data_variant = _collider_data_pool.allocate();
+            if (data_variant == nullptr) {
+                return nullptr;
+            }
+            data_variant->emplace<CircleCollider2dImpl::Data>();
+            collider_handle_2d_t hndl = static_cast<collider_handle_2d_t>(_collider_data_pool.ptrToIdx(data_variant));
+            return std::make_unique<CircleCollider2dImpl>(*this, hndl);
+            // return std::make_unique<CircleCollider2dImpl>(data_variant);
+        }
+        break;
+    case  Collider2d::ColliderType::LINE:
         /* code */
         break;
 
     default:
         break;
     }
+
+    return nullptr;
 }
 
 } // namespace zo
