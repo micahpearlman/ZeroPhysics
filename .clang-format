@@ -1,5 +1,6 @@
 ---
 Language:        Cpp
+SeparateDefinitionBlocks: Always
 # BasedOnStyle:  LLVM
 AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
@@ -133,5 +134,6 @@ StatementMacros:
 TabWidth:        8
 UseCRLF:         false
 UseTab:          Never
+
 ...
 

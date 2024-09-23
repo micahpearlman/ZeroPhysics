@@ -20,15 +20,15 @@ class PhysicsSystem2dImpl;
 
 /// @brief A view of the physics object data
 class PhysicsObject2dImpl : public PhysicsObject2d {
+
   public:
     /// @brief The data for a physics object
     struct alignas(std::max_align_t) Data {
-        glm::vec2 position = {0, 0};
-        glm::vec2 prev_position = {0, 0};
-        glm::vec2 acceleration = {0, 0};
-        glm::vec2 force = {0, 0};
-
-        float mass = 1;
+        glm::vec2                                       position = {0, 0};
+        glm::vec2                                       prev_position = {0, 0};
+        glm::vec2                                       acceleration = {0, 0};
+        glm::vec2                                       force = {0, 0};
+        float                                           mass = 1;
     };
 
   public:

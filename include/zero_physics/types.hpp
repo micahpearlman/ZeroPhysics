@@ -12,6 +12,7 @@
 #define __zoPhysicsTypes_h__
 #include <cstdint>
 #include <glm/glm.hpp>
+
 namespace zo {
 // handles
 using force_handle_2d_t = uint64_t;
@@ -22,8 +23,15 @@ struct ColliderHandle;
 using collider_handle_2d_t = ColliderHandle;
 
 struct line_segment_2d_t {
-    glm::vec2 start;
-    glm::vec2 end;
+    union {
+        struct {
+            glm::vec2 start;
+            glm::vec2 end;
+        } s;
+
+        std::array<glm::vec2, 2> a;
+
+    } v;
 };
 
 struct aabb_2d_t {
@@ -32,7 +40,14 @@ struct aabb_2d_t {
 };
 
 struct circle_2d_t {
-    glm::vec2 center;
+    union {
+        struct {
+            glm::vec2 center;
+        } s;
+
+        std::array<glm::vec2, 1> a;
+    } v;
+
     float radius;
 };
 
@@ -41,14 +56,11 @@ struct ray_2d_t {
     glm::vec2 direction;
 };
 
-
 struct contact_2d_t {
     glm::vec2 normal;
     glm::vec2 point;
-    float penetration;
+    float     penetration;
 };
-
-
 
 } // namespace zo
 #endif // __zoPhysicsTypes_h__

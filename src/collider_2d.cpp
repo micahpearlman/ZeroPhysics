@@ -14,7 +14,7 @@
 
 namespace zo {
 Collider2dImpl::Collider2dImpl(CollisionSystem2dImpl &collision_system,
-                               collider_handle_2d_t  &handle)
+                               collider_handle_2d_t  handle)
     : _sys(collision_system), _hndl(handle) {}
 
 void Collider2dImpl::setSensor(bool isSensor) {
@@ -51,7 +51,7 @@ collider_handle_2d_t Collider2dImpl::handle() const { return _hndl; }
 /// CircleCollider2dImpl
 
 CircleCollider2dImpl::CircleCollider2dImpl(
-    CollisionSystem2dImpl &collision_system, collider_handle_2d_t &handle)
+    CollisionSystem2dImpl &collision_system, collider_handle_2d_t handle)
     : Collider2dImpl(collision_system, handle),
       _data{system().getColliderData<CircleCollider2dImpl::Data>(handle)} {}
 
@@ -75,19 +75,19 @@ const Collider2dImpl::Data &CircleCollider2dImpl::baseData() const {
 
 /// LineCollider2dImpl
 LineCollider2dImpl::LineCollider2dImpl(CollisionSystem2dImpl &collision_system,
-                                       collider_handle_2d_t  &handle)
+                                       collider_handle_2d_t  handle)
     : Collider2dImpl(collision_system, handle),
       _data{system().getColliderData<LineCollider2dImpl::Data>(handle)} {}
 
 void LineCollider2dImpl::setStart(const glm::vec2 &start) {
-    data().line.start = start;
+    data().line.v.s.start = start;
 }
 
-glm::vec2 LineCollider2dImpl::start() const { return data().line.start; }
+glm::vec2 LineCollider2dImpl::start() const { return data().line.v.s.start; }
 
-void LineCollider2dImpl::setEnd(const glm::vec2 &end) { data().line.end = end; }
+void LineCollider2dImpl::setEnd(const glm::vec2 &end) { data().line.v.s.end = end; }
 
-glm::vec2 LineCollider2dImpl::end() const { return data().line.end; }
+glm::vec2 LineCollider2dImpl::end() const { return data().line.v.s.end; }
 
 void LineCollider2dImpl::setLine(const line_segment_2d_t &line) {
     data().line = line;
@@ -96,6 +96,7 @@ void LineCollider2dImpl::setLine(const line_segment_2d_t &line) {
 line_segment_2d_t LineCollider2dImpl::line() const { return data().line; }
 
 Collider2dImpl::Data       &LineCollider2dImpl::baseData() { return data(); }
+
 const Collider2dImpl::Data &LineCollider2dImpl::baseData() const {
     return data();
 }

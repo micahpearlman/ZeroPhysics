@@ -13,10 +13,12 @@
 
 #include <zero_physics/collider_2d.hpp>
 #include <zero_physics/types.hpp>
+#include "types_impl.hpp"
 
 namespace zo {
 
 class CollisionSystem2dImpl;
+
 class Collider2dImpl : virtual public Collider2d {
   protected:
     struct alignas(std::max_align_t) Data {
@@ -29,11 +31,11 @@ class Collider2dImpl : virtual public Collider2d {
     };
 
     CollisionSystem2dImpl &_sys;
-    collider_handle_2d_t  &_hndl;
+    collider_handle_2d_t   _hndl;
 
   public:
     Collider2dImpl(CollisionSystem2dImpl &collision_system,
-                   collider_handle_2d_t  &handle);
+                   collider_handle_2d_t   handle);
     virtual ~Collider2dImpl() = default;
     void  setSensor(bool isSensor) override;
     bool  isSensor() const override;
@@ -60,7 +62,7 @@ class CircleCollider2dImpl : public Collider2dImpl, public CircleCollider2d {
 
   public:
     CircleCollider2dImpl(CollisionSystem2dImpl &collision_system,
-                         collider_handle_2d_t  &handle);
+                         collider_handle_2d_t   handle);
     virtual ~CircleCollider2dImpl() = default;
     void        setRadius(float radius) override;
     float       radius() const override;
@@ -72,7 +74,8 @@ class CircleCollider2dImpl : public Collider2dImpl, public CircleCollider2d {
     Collider2dImpl::Data       &baseData() override;
     const Collider2dImpl::Data &baseData() const override;
 
-    CircleCollider2dImpl::Data       &data() { return _data; }
+    CircleCollider2dImpl::Data &data() { return _data; }
+
     CircleCollider2dImpl::Data const &data() const { return _data; }
 
   private:
@@ -87,7 +90,7 @@ class LineCollider2dImpl : public Collider2dImpl, public LineCollider2d {
 
   public:
     LineCollider2dImpl(CollisionSystem2dImpl &collision_system,
-                       collider_handle_2d_t &handle);
+                       collider_handle_2d_t   handle);
     virtual ~LineCollider2dImpl() = default;
     void              setStart(const glm::vec2 &start) override;
     glm::vec2         start() const override;
@@ -99,12 +102,12 @@ class LineCollider2dImpl : public Collider2dImpl, public LineCollider2d {
     Collider2dImpl::Data       &baseData() override;
     const Collider2dImpl::Data &baseData() const override;
 
-    LineCollider2dImpl::Data       &data() { return _data; }
+    LineCollider2dImpl::Data &data() { return _data; }
+
     LineCollider2dImpl::Data const &data() const { return _data; }
 
   private:
     LineCollider2dImpl::Data &_data;
-
 };
 } // namespace zo
 #endif // __zoPhysicsCollider2dImpl_h__

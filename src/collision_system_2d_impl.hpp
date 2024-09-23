@@ -14,12 +14,9 @@
 #include <zero_physics/types.hpp>
 #include <zero_physics/memory.hpp>
 #include "collider_2d_impl.hpp"
+#include "types_impl.hpp"
 namespace zo {
 
-struct ColliderHandle {
-    uint8_t  collider_type : 4;
-    uint32_t index : 28;
-};
 class CollisionSystem2dImpl : public CollisionSystem2d {
   public:
     CollisionSystem2dImpl(size_t max_colliders);
@@ -34,9 +31,11 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
         }
         else if constexpr (std::is_same_v<T, LineCollider2dImpl::Data>) {
             return *_line_collider_pool.idxToPtr(hndl.index);
+        } else {
+            static_assert(std::is_same_v<T, CircleCollider2dImpl::Data> ||
+                          std::is_same_v<T, LineCollider2dImpl::Data>, "Invalid collider type");
         }
 
-        throw std::runtime_error("Invalid collider type or type mismatch");
     }
 
   private:
