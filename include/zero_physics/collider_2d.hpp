@@ -57,6 +57,8 @@ class LineCollider2d : virtual public Collider2d {
     virtual glm::vec2         end() const = 0;
     virtual void              setLine(const line_segment_2d_t &line) = 0;
     virtual line_segment_2d_t line() const = 0;
+
+    ColliderType type() const override { return ColliderType::LINE; }
 };
 
 class BoxCollider2d : virtual public Collider2d {
@@ -66,6 +68,8 @@ class BoxCollider2d : virtual public Collider2d {
     virtual float width() const = 0;
     virtual void  setHeight(float height) = 0;
     virtual float height() const = 0;
+
+    ColliderType type() const override { return ColliderType::BOX; }
 };
 }; // namespace zo
 

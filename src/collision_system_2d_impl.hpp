@@ -29,22 +29,19 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
     createCollider(Collider2d::ColliderType type) override;
 
     template <typename T> T &getColliderData(collider_handle_2d_t hndl) {
-        switch (static_cast<Collider2d::ColliderType>(hndl.collider_type)) {
-        case Collider2d::ColliderType::CIRCLE:
+        if constexpr (std::is_same_v<T, CircleCollider2dImpl::Data>) {
             return *_circle_collider_pool.idxToPtr(hndl.index);
-            break;
-        case Collider2d::ColliderType::LINE:
-            // return *_line_collider_pool.idxToPtr(hndl.index);
-            break;
-        default:
-            break;
         }
-        throw std::runtime_error("Invalid collider type");
+        else if constexpr (std::is_same_v<T, LineCollider2dImpl::Data>) {
+            return *_line_collider_pool.idxToPtr(hndl.index);
+        }
+
+        throw std::runtime_error("Invalid collider type or type mismatch");
     }
 
   private:
     MemoryPool<CircleCollider2dImpl::Data> _circle_collider_pool;
-    // MemoryPool<LineCollider2dImpl::Data>   _line_collider_pool;
+    MemoryPool<LineCollider2dImpl::Data>   _line_collider_pool;
 };
 
 } // namespace zo

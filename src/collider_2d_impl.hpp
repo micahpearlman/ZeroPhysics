@@ -87,7 +87,7 @@ class LineCollider2dImpl : public Collider2dImpl, public LineCollider2d {
 
   public:
     LineCollider2dImpl(CollisionSystem2dImpl &collision_system,
-                       collider_handle_2d_t &handle, line_segment_2d_t line);
+                       collider_handle_2d_t &handle);
     virtual ~LineCollider2dImpl() = default;
     void              setStart(const glm::vec2 &start) override;
     glm::vec2         start() const override;
@@ -95,6 +95,16 @@ class LineCollider2dImpl : public Collider2dImpl, public LineCollider2d {
     glm::vec2         end() const override;
     void              setLine(const line_segment_2d_t &line) override;
     line_segment_2d_t line() const override;
+
+    Collider2dImpl::Data       &baseData() override;
+    const Collider2dImpl::Data &baseData() const override;
+
+    LineCollider2dImpl::Data       &data() { return _data; }
+    LineCollider2dImpl::Data const &data() const { return _data; }
+
+  private:
+    LineCollider2dImpl::Data &_data;
+
 };
 } // namespace zo
 #endif // __zoPhysicsCollider2dImpl_h__

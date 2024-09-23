@@ -34,13 +34,21 @@ CollisionSystem2dImpl::createCollider(Collider2d::ColliderType type) {
         if (data == nullptr) {
             return nullptr;
         }
-        collider_handle_2d_t hndl = {uint8_t(Collider2d::ColliderType::CIRCLE),
-                                     uint32_t(_circle_collider_pool.ptrToIdx(data))};
+        collider_handle_2d_t hndl = {
+            uint8_t(Collider2d::ColliderType::CIRCLE),
+            uint32_t(_circle_collider_pool.ptrToIdx(data))};
         return std::make_unique<CircleCollider2dImpl>(*this, hndl);
     } break;
-    case Collider2d::ColliderType::LINE:
-        /* code */
-        break;
+    case Collider2d::ColliderType::LINE: {
+        LineCollider2dImpl::Data *data = _line_collider_pool.allocate();
+        if (data == nullptr) {
+            return nullptr;
+        }
+        collider_handle_2d_t hndl = {
+            uint8_t(Collider2d::ColliderType::LINE),
+            uint32_t(_line_collider_pool.ptrToIdx(data))};
+        return std::make_unique<LineCollider2dImpl>(*this, hndl);
+    } break;
 
     default:
         break;
