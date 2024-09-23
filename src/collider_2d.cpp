@@ -14,7 +14,7 @@
 
 namespace zo {
 Collider2dImpl::Collider2dImpl(CollisionSystem2dImpl &collision_system,
-                               collider_handle_2d_t   handle)
+                               collider_handle_2d_t  &handle)
     : _sys(collision_system), _hndl(handle) {}
 void Collider2dImpl::setSensor(bool isSensor) {
     baseData().is_sensor = isSensor;
@@ -42,7 +42,7 @@ collider_handle_2d_t Collider2dImpl::handle() const { return _hndl; }
 /// CircleCollider2dImpl
 
 CircleCollider2dImpl::CircleCollider2dImpl(
-    CollisionSystem2dImpl &collision_system, collider_handle_2d_t handle)
+    CollisionSystem2dImpl &collision_system, collider_handle_2d_t &handle)
     : Collider2dImpl(collision_system, handle),
       _data{system().getColliderData<CircleCollider2dImpl::Data>(handle)} {}
 

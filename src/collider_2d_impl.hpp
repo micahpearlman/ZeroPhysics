@@ -20,20 +20,20 @@ class CollisionSystem2dImpl;
 class Collider2dImpl : virtual public Collider2d {
   protected:
     struct alignas(std::max_align_t) Data {
-        bool         is_sensor;
-        float        friction;
-        float        restitution;
-        uint16_t     category_bits;
-        uint16_t     mask_bits;
-        ColliderType type;
+        uint8_t  type;
+        bool     is_sensor;
+        float    friction;
+        float    restitution;
+        uint16_t category_bits;
+        uint16_t mask_bits;
     };
 
     CollisionSystem2dImpl &_sys;
-    collider_handle_2d_t   _hndl;
+    collider_handle_2d_t  &_hndl;
 
   public:
     Collider2dImpl(CollisionSystem2dImpl &collision_system,
-                   collider_handle_2d_t handle);
+                   collider_handle_2d_t  &handle);
     virtual ~Collider2dImpl() = default;
     void  setSensor(bool isSensor) override;
     bool  isSensor() const override;
@@ -45,15 +45,11 @@ class Collider2dImpl : virtual public Collider2d {
     void  getFilter(uint16_t &categoryBits, uint16_t &maskBits) const override;
     collider_handle_2d_t handle() const override;
 
-    CollisionSystem2dImpl& system() { return _sys; }
+    CollisionSystem2dImpl &system() { return _sys; }
 
   protected:
     virtual Collider2dImpl::Data       &baseData() = 0;
     virtual const Collider2dImpl::Data &baseData() const = 0;
-
-
-
-
 };
 
 class CircleCollider2dImpl : public Collider2dImpl, public CircleCollider2d {
@@ -64,7 +60,7 @@ class CircleCollider2dImpl : public Collider2dImpl, public CircleCollider2d {
 
   public:
     CircleCollider2dImpl(CollisionSystem2dImpl &collision_system,
-                         collider_handle_2d_t handle);
+                         collider_handle_2d_t  &handle);
     virtual ~CircleCollider2dImpl() = default;
     void        setRadius(float radius) override;
     float       radius() const override;
@@ -76,12 +72,11 @@ class CircleCollider2dImpl : public Collider2dImpl, public CircleCollider2d {
     Collider2dImpl::Data       &baseData() override;
     const Collider2dImpl::Data &baseData() const override;
 
-    CircleCollider2dImpl::Data& data() { return _data; }
-    CircleCollider2dImpl::Data const& data() const { return _data; }
+    CircleCollider2dImpl::Data       &data() { return _data; }
+    CircleCollider2dImpl::Data const &data() const { return _data; }
 
   private:
-    CircleCollider2dImpl::Data& _data;
-
+    CircleCollider2dImpl::Data &_data;
 };
 
 class LineCollider2dImpl : public Collider2dImpl, public LineCollider2d {
@@ -92,7 +87,7 @@ class LineCollider2dImpl : public Collider2dImpl, public LineCollider2d {
 
   public:
     LineCollider2dImpl(CollisionSystem2dImpl &collision_system,
-                       collider_handle_2d_t handle, line_segment_2d_t line);
+                       collider_handle_2d_t &handle, line_segment_2d_t line);
     virtual ~LineCollider2dImpl() = default;
     void              setStart(const glm::vec2 &start) override;
     glm::vec2         start() const override;

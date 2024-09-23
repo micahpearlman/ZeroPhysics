@@ -13,27 +13,32 @@
 namespace zo {
 
 CollisionSystem2dImpl::CollisionSystem2dImpl(size_t max_colliders)
-    : _collider_data_pool(max_colliders) {}
+    : _circle_collider_pool(max_colliders) {
 
-std::shared_ptr<CollisionSystem2d> CollisionSystem2d::create(size_t max_colliders) {
+    // make sure the max colliders cannot be greater then 28 bits
+    if (max_colliders > (1 << 28)) {
+        throw std::runtime_error("max_colliders must be less than 2^28");
+    }
+}
+
+std::shared_ptr<CollisionSystem2d>
+CollisionSystem2d::create(size_t max_colliders) {
     return std::make_shared<CollisionSystem2dImpl>(max_colliders);
 }
 
-std::unique_ptr<Collider2d> CollisionSystem2dImpl::createCollider(Collider2d::ColliderType type) {
+std::unique_ptr<Collider2d>
+CollisionSystem2dImpl::createCollider(Collider2d::ColliderType type) {
     switch (type) {
-    case  Collider2d::ColliderType::CIRCLE:
-        {
-            ColliderDataVariant* data_variant = _collider_data_pool.allocate();
-            if (data_variant == nullptr) {
-                return nullptr;
-            }
-            data_variant->emplace<CircleCollider2dImpl::Data>();
-            collider_handle_2d_t hndl = static_cast<collider_handle_2d_t>(_collider_data_pool.ptrToIdx(data_variant));
-            return std::make_unique<CircleCollider2dImpl>(*this, hndl);
-            // return std::make_unique<CircleCollider2dImpl>(data_variant);
+    case Collider2d::ColliderType::CIRCLE: {
+        CircleCollider2dImpl::Data *data = _circle_collider_pool.allocate();
+        if (data == nullptr) {
+            return nullptr;
         }
-        break;
-    case  Collider2d::ColliderType::LINE:
+        collider_handle_2d_t hndl = {uint8_t(Collider2d::ColliderType::CIRCLE),
+                                     uint32_t(_circle_collider_pool.ptrToIdx(data))};
+        return std::make_unique<CircleCollider2dImpl>(*this, hndl);
+    } break;
+    case Collider2d::ColliderType::LINE:
         /* code */
         break;
 

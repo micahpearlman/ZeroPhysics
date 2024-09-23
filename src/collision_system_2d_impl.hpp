@@ -14,9 +14,12 @@
 #include <zero_physics/types.hpp>
 #include <zero_physics/memory.hpp>
 #include "collider_2d_impl.hpp"
-#include <variant>
 namespace zo {
 
+struct ColliderHandle {
+    uint8_t  collider_type : 4;
+    uint32_t index : 28;
+};
 class CollisionSystem2dImpl : public CollisionSystem2d {
   public:
     CollisionSystem2dImpl(size_t max_colliders);
@@ -25,15 +28,23 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
     std::unique_ptr<Collider2d>
     createCollider(Collider2d::ColliderType type) override;
 
-    template <typename T>
-    T &getColliderData(collider_handle_2d_t hndl) {
-        ColliderDataVariant* data_variant = _collider_data_pool.idxToPtr(hndl);
-        return std::get<T>(*data_variant);
+    template <typename T> T &getColliderData(collider_handle_2d_t hndl) {
+        switch (static_cast<Collider2d::ColliderType>(hndl.collider_type)) {
+        case Collider2d::ColliderType::CIRCLE:
+            return *_circle_collider_pool.idxToPtr(hndl.index);
+            break;
+        case Collider2d::ColliderType::LINE:
+            // return *_line_collider_pool.idxToPtr(hndl.index);
+            break;
+        default:
+            break;
+        }
+        throw std::runtime_error("Invalid collider type");
     }
+
   private:
-    using ColliderDataVariant =
-        std::variant<CircleCollider2dImpl::Data, LineCollider2dImpl::Data>;
-    MemoryPool<ColliderDataVariant> _collider_data_pool;
+    MemoryPool<CircleCollider2dImpl::Data> _circle_collider_pool;
+    // MemoryPool<LineCollider2dImpl::Data>   _line_collider_pool;
 };
 
 } // namespace zo
