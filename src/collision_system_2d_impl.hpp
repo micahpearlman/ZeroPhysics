@@ -23,7 +23,7 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
     ~CollisionSystem2dImpl() = default;
 
     std::unique_ptr<Collider2d>
-    createCollider(Collider2d::ColliderType type) override;
+    createCollider(ColliderType type) override;
 
     template <typename T> T &getColliderData(collider_handle_2d_t hndl) {
         if constexpr (std::is_same_v<T, CircleCollider2dImpl::Data>) {

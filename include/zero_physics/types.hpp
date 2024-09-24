@@ -21,17 +21,12 @@ using phy_obj_handle_2d_t = uint64_t;
 // collider handle
 struct ColliderHandle;
 using collider_handle_2d_t = ColliderHandle;
+// collider enum
+enum class ColliderType { CIRCLE = 0, LINE = 1, BOX = 2, MAX = 3 };
 
 struct line_segment_2d_t {
-    union {
-        struct {
-            glm::vec2 start;
-            glm::vec2 end;
-        } s;
-
-        std::array<glm::vec2, 2> a;
-
-    } v;
+    glm::vec2 start;
+    glm::vec2 end;
 };
 
 struct aabb_2d_t {
@@ -40,15 +35,8 @@ struct aabb_2d_t {
 };
 
 struct circle_2d_t {
-    union {
-        struct {
-            glm::vec2 center;
-        } s;
-
-        std::array<glm::vec2, 1> a;
-    } v;
-
-    float radius;
+    glm::vec2 center;
+    float     radius;
 };
 
 struct ray_2d_t {

@@ -13,6 +13,7 @@
 #include <zero_physics/physics_object_2d.hpp>
 #include <zero_physics/memory.hpp>
 #include <zero_physics/types.hpp>
+#include <zero_physics/collision_system_2d.hpp>
 #include <optional>
 #include <memory>
 #include <glm/glm.hpp>
@@ -56,7 +57,14 @@ class PhysicsSystem2d {
     /// @return a handle to the physics object
     virtual std::unique_ptr<PhysicsObject2d> createPhysicsObject() = 0;
 
+    /// @brief checks if the physics handle is valid
+    /// @param hndl 
+    /// @return true if the handle is valid
     virtual bool isPhysicsHandleValid(phy_obj_handle_2d_t hndl) const = 0;
+
+    /// @brief Get the collision system
+    /// @return 
+    virtual CollisionSystem2d &collisionSystem() = 0;
 
 };
 } // namespace zo

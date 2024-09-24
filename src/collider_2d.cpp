@@ -80,14 +80,14 @@ LineCollider2dImpl::LineCollider2dImpl(CollisionSystem2dImpl &collision_system,
       _data{system().getColliderData<LineCollider2dImpl::Data>(handle)} {}
 
 void LineCollider2dImpl::setStart(const glm::vec2 &start) {
-    data().line.v.s.start = start;
+    data().line.start = start;
 }
 
-glm::vec2 LineCollider2dImpl::start() const { return data().line.v.s.start; }
+glm::vec2 LineCollider2dImpl::start() const { return data().line.start; }
 
-void LineCollider2dImpl::setEnd(const glm::vec2 &end) { data().line.v.s.end = end; }
+void LineCollider2dImpl::setEnd(const glm::vec2 &end) { data().line.end = end; }
 
-glm::vec2 LineCollider2dImpl::end() const { return data().line.v.s.end; }
+glm::vec2 LineCollider2dImpl::end() const { return data().line.end; }
 
 void LineCollider2dImpl::setLine(const line_segment_2d_t &line) {
     data().line = line;

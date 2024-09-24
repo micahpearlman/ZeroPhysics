@@ -17,9 +17,6 @@
 namespace zo {
 class Collider2d {
   public:
-    // collider enum
-    enum class ColliderType { CIRCLE = 0, LINE = 1, BOX = 2, MAX = 3 };
-
   public:
     virtual ~Collider2d() = default;
     virtual void  setSensor(bool isSensor) = 0;
@@ -33,6 +30,10 @@ class Collider2d {
                             uint16_t &maskBits) const = 0;
     virtual collider_handle_2d_t handle() const = 0;
     virtual ColliderType         type() const = 0;
+
+    template <typename T> T &as() {
+        return *dynamic_cast<T*>(this);
+    }
 };
 
 class CircleCollider2d : virtual public Collider2d {

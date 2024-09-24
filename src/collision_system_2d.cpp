@@ -27,25 +27,25 @@ CollisionSystem2d::create(size_t max_colliders) {
 }
 
 std::unique_ptr<Collider2d>
-CollisionSystem2dImpl::createCollider(Collider2d::ColliderType type) {
+CollisionSystem2dImpl::createCollider(ColliderType type) {
     switch (type) {
-    case Collider2d::ColliderType::CIRCLE: {
+    case ColliderType::CIRCLE: {
         CircleCollider2dImpl::Data *data = _circle_collider_pool.allocate();
         if (data == nullptr) {
             return nullptr;
         }
         collider_handle_2d_t hndl = {
-            uint8_t(Collider2d::ColliderType::CIRCLE),
+            uint8_t(ColliderType::CIRCLE),
             uint32_t(_circle_collider_pool.ptrToIdx(data))};
         return std::make_unique<CircleCollider2dImpl>(*this, hndl);
     } break;
-    case Collider2d::ColliderType::LINE: {
+    case ColliderType::LINE: {
         LineCollider2dImpl::Data *data = _line_collider_pool.allocate();
         if (data == nullptr) {
             return nullptr;
         }
         collider_handle_2d_t hndl = {
-            uint8_t(Collider2d::ColliderType::LINE),
+            uint8_t(ColliderType::LINE),
             uint32_t(_line_collider_pool.ptrToIdx(data))};
         return std::make_unique<LineCollider2dImpl>(*this, hndl);
     } break;

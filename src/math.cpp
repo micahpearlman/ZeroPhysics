@@ -14,14 +14,14 @@ namespace zo {
 glm::vec2 closest_point_on_line_segment(const glm::vec2         &p,
                                         const line_segment_2d_t &ls) {
     // project p onto the line segment
-    glm::vec2 ls_diff = ls.v.s.end - ls.v.s.start;
-    float     t = glm::dot(p - ls.v.s.start, ls_diff) / glm::dot(ls_diff, ls_diff);
+    glm::vec2 ls_diff = ls.end - ls.start;
+    float     t = glm::dot(p - ls.start, ls_diff) / glm::dot(ls_diff, ls_diff);
 
     // clamp t to the line segment
     t = glm::clamp(t, 0.0f, 1.0f);
 
     // calculate the closest point from t
-    glm::vec2 closest_point = (ls.v.s.start + ls_diff) * t;
+    glm::vec2 closest_point = (ls.start + ls_diff) * t;
 
     return closest_point;
 }

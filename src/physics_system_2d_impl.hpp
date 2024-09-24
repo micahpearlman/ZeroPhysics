@@ -22,16 +22,20 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
     PhysicsSystem2dImpl(size_t max_num_objects, float iterations);
     virtual ~PhysicsSystem2dImpl() = default;
 
-    void              update(float dt) override;
+    void update(float dt) override;
+
     force_handle_2d_t addGlobalForce(const glm::vec2 &f) override;
     void              removeGlobalForce(force_handle_2d_t id) override;
     std::optional<glm::vec2>
     getGlobalForce(force_handle_2d_t id) const override;
     const ComponentStore<glm::vec2> &globalForces() const override;
+
     std::unique_ptr<PhysicsObject2d> createPhysicsObject() override;
     bool isPhysicsHandleValid(phy_obj_handle_2d_t hndl) const override;
 
-  public:
+    CollisionSystem2d &collisionSystem() override { return *_collision_system; }
+
+  public: // Implementation specific
     float lastTimeStep() const { return _last_time_step; }
 
     ComponentStore<PhysicsObject2dImpl::Data> &physicsObjects() {

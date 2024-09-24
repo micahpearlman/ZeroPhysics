@@ -11,6 +11,7 @@
 
 // Zero Physics
 #include <zero_physics/physics_system_2d.hpp>
+#include <zero_physics/collider_2d.hpp>
 
 // MonkVG OpenVG interface
 #include <MonkVG/openvg.h>
@@ -31,6 +32,7 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
+#include <memory>
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
@@ -42,7 +44,7 @@ class GameObject {
     VGPaint _stroke_paint;
 
     std::unique_ptr<zo::PhysicsObject2d> _phy_obj;
-    std::shared_ptr<zo::PhysicsSystem2d>    _physics_system;
+    std::shared_ptr<zo::PhysicsSystem2d> _physics_system;
 
   public:
     GameObject(VGPath path, VGPaint fill_paint, VGPaint stroke_paint,
@@ -143,7 +145,8 @@ int main(int argc, char **argv) {
         zo::PhysicsSystem2d::create(1024, 1);
 
     // create a physics object
-    std::unique_ptr<zo::PhysicsObject2d> phy_obj = physics_system->createPhysicsObject();
+    std::unique_ptr<zo::PhysicsObject2d> phy_obj =
+        physics_system->createPhysicsObject();
     phy_obj->setPosition({100, 100});
 
     physics_system->addGlobalForce({0, 9.8f});
@@ -156,17 +159,27 @@ int main(int argc, char **argv) {
 
     // FIXME:  this is not working ~V BELOW ~V
     // create a floor physics object and render object
-    std::unique_ptr<zo::PhysicsObject2d> floor = physics_system->createPhysicsObject();
-    floor->setMass(-1.0f);  // infinite mass
-    // floor->setPosition({0, 200});
-    // floor->setStatic(true);  // TODO: FIXME: this is not working
+    // std::unique_ptr<zo::PhysicsObject2d> floor =
+    // physics_system->createPhysicsObject(); floor->setMass(-1.0f);  //
+    // infinite mass floor->setPosition({0, 200}); floor->setStatic(true);  //
+    // TODO: FIXME: this is not working
 
-    // // create a floor path
-    VGPath floor_path = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
-                                     0, 0, 0, VG_PATH_CAPABILITY_ALL);
+    // floor collider
+    zo::CollisionSystem2d &collision_system = physics_system->collisionSystem();
+    std::unique_ptr<zo::Collider2d> floor_collider =
+        collision_system.createCollider(zo::ColliderType::LINE);
+    zo::LineCollider2d& floor_line_collider = floor_collider->as<zo::LineCollider2d>();
+
+    // std::unique_ptr<zo::LineCollider2d> floor_line_collider =
+    //     std::make_unique<zo::LineCollider2d>(floor_collider.release());
+    floor_line_collider.setStart({0, 200});
+    floor_line_collider.setEnd({(float)width, 200});
+
+    // create a floor path
+    VGPath floor_path =
+        vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1, 0, 0, 0,
+                     VG_PATH_CAPABILITY_ALL);
     vguRect(floor_path, 0.0f, height - 10.0f, width, 10.0f);
-
-
 
     float  last_time = glfwGetTime();
     double previous_seconds = glfwGetTime();
@@ -196,7 +209,6 @@ int main(int argc, char **argv) {
         vgSetPaint(stroke_paint, VG_STROKE_PATH);
         vgDrawPath(floor_path, VG_FILL_PATH | VG_STROKE_PATH);
 
-
         // draw object
         vgLoadIdentity();
         glm::vec2 pos = phy_obj->position();
@@ -220,10 +232,10 @@ int main(int argc, char **argv) {
             double fps = (double)frame_count / elapsed_seconds;
             double ms_per_frame = 1000.0 / fps;
 
-
             std::stringstream ss;
-            ss << "Zero Physics Hello World - " << std::fixed << std::setprecision(2) 
-               << ms_per_frame << " ms/frame (" << std::setprecision(1) << fps << " FPS)";
+            ss << "Zero Physics Hello World - " << std::fixed
+               << std::setprecision(2) << ms_per_frame << " ms/frame ("
+               << std::setprecision(1) << fps << " FPS)";
             std::string title = ss.str();
             glfwSetWindowTitle(window, title.c_str());
             frame_count = 0;
