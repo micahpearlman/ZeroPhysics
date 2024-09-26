@@ -21,6 +21,7 @@ using phy_obj_handle_2d_t = uint64_t;
 // collider handle
 struct ColliderHandle;
 using collider_handle_2d_t = ColliderHandle;
+
 // collider enum
 enum class ColliderType { CIRCLE = 0, LINE = 1, BOX = 2, MAX = 3 };
 

@@ -25,7 +25,18 @@ public:
 
     virtual ~CollisionSystem2d() = default;
 
-    virtual std::unique_ptr<Collider2d> createCollider(ColliderType type) = 0;
+    template<typename T>
+    std::unique_ptr<T> createCollider() {
+        if constexpr (std::is_same_v<T, CircleCollider2d>) {
+            return CircleCollider2d::create(*this);
+        } else if constexpr (std::is_same_v<T, LineCollider2d>) {
+            return LineCollider2d::create(*this);
+        } else {
+            static_assert(std::is_same_v<T, CircleCollider2d> || std::is_same_v<T, LineCollider2d>, "Invalid collider type");
+        }
+    }
+
+    // virtual std::unique_ptr<Collider2d> createCollider(ColliderType type) = 0;
 };
 
 }

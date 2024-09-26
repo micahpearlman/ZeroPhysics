@@ -14,7 +14,7 @@
 
 namespace zo {
 Collider2dImpl::Collider2dImpl(CollisionSystem2dImpl &collision_system,
-                               collider_handle_2d_t  handle)
+                               collider_handle_2d_t   handle)
     : _sys(collision_system), _hndl(handle) {}
 
 void Collider2dImpl::setSensor(bool isSensor) {
@@ -50,6 +50,18 @@ collider_handle_2d_t Collider2dImpl::handle() const { return _hndl; }
 
 /// CircleCollider2dImpl
 
+std::unique_ptr<CircleCollider2d>
+CircleCollider2d::create(CollisionSystem2d &collision_system) {
+    CollisionSystem2dImpl &sys =
+        dynamic_cast<CollisionSystem2dImpl &>(collision_system);
+    std::optional<collider_handle_2d_t> collider_handle =
+        sys.createCollider(ColliderType::CIRCLE);
+    if (!collider_handle.has_value()) {
+        return nullptr;
+    }
+    return std::make_unique<CircleCollider2dImpl>(sys, collider_handle.value());
+}
+
 CircleCollider2dImpl::CircleCollider2dImpl(
     CollisionSystem2dImpl &collision_system, collider_handle_2d_t handle)
     : Collider2dImpl(collision_system, handle),
@@ -58,24 +70,43 @@ CircleCollider2dImpl::CircleCollider2dImpl(
 void CircleCollider2dImpl::setRadius(float radius) {
     data().circle.radius = radius;
 }
+
 float CircleCollider2dImpl::radius() const { return data().circle.radius; }
-void  CircleCollider2dImpl::setCenter(const glm::vec2 &center) {
+
+void CircleCollider2dImpl::setCenter(const glm::vec2 &center) {
     data().circle.center = center;
 }
+
 glm::vec2 CircleCollider2dImpl::center() const { return data().circle.center; }
-void      CircleCollider2dImpl::setCircle(const circle_2d_t &circle) {
+
+void CircleCollider2dImpl::setCircle(const circle_2d_t &circle) {
     data().circle = circle;
 }
+
 circle_2d_t CircleCollider2dImpl::circle() const { return data().circle; }
 
-Collider2dImpl::Data       &CircleCollider2dImpl::baseData() { return data(); }
+Collider2dImpl::Data &CircleCollider2dImpl::baseData() { return data(); }
+
 const Collider2dImpl::Data &CircleCollider2dImpl::baseData() const {
     return data();
 }
 
 /// LineCollider2dImpl
+
+std::unique_ptr<LineCollider2d>
+LineCollider2d::create(CollisionSystem2d &collision_system) {
+    CollisionSystem2dImpl &sys =
+        dynamic_cast<CollisionSystem2dImpl &>(collision_system);
+    std::optional<collider_handle_2d_t> collider_handle =
+        sys.createCollider(ColliderType::LINE);
+    if (!collider_handle.has_value()) {
+        return nullptr;
+    }
+    return std::make_unique<LineCollider2dImpl>(sys, collider_handle.value());
+}
+
 LineCollider2dImpl::LineCollider2dImpl(CollisionSystem2dImpl &collision_system,
-                                       collider_handle_2d_t  handle)
+                                       collider_handle_2d_t   handle)
     : Collider2dImpl(collision_system, handle),
       _data{system().getColliderData<LineCollider2dImpl::Data>(handle)} {}
 
@@ -95,7 +126,7 @@ void LineCollider2dImpl::setLine(const line_segment_2d_t &line) {
 
 line_segment_2d_t LineCollider2dImpl::line() const { return data().line; }
 
-Collider2dImpl::Data       &LineCollider2dImpl::baseData() { return data(); }
+Collider2dImpl::Data &LineCollider2dImpl::baseData() { return data(); }
 
 const Collider2dImpl::Data &LineCollider2dImpl::baseData() const {
     return data();

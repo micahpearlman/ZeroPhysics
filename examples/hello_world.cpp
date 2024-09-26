@@ -166,14 +166,16 @@ int main(int argc, char **argv) {
 
     // floor collider
     zo::CollisionSystem2d &collision_system = physics_system->collisionSystem();
-    std::unique_ptr<zo::Collider2d> floor_collider =
-        collision_system.createCollider(zo::ColliderType::LINE);
-    zo::LineCollider2d& floor_line_collider = floor_collider->as<zo::LineCollider2d>();
+    std::unique_ptr<zo::LineCollider2d> line_collider = collision_system.createCollider<zo::LineCollider2d>();
 
-    // std::unique_ptr<zo::LineCollider2d> floor_line_collider =
-    //     std::make_unique<zo::LineCollider2d>(floor_collider.release());
-    floor_line_collider.setStart({0, 200});
-    floor_line_collider.setEnd({(float)width, 200});
+    // std::unique_ptr<zo::Collider2d> floor_collider =
+    //     collision_system.createCollider(zo::ColliderType::LINE);
+    // zo::LineCollider2d& floor_line_collider = floor_collider->as<zo::LineCollider2d>();
+
+    // // std::unique_ptr<zo::LineCollider2d> floor_line_collider =
+    // //     std::make_unique<zo::LineCollider2d>(floor_collider.release());
+    // floor_line_collider.setStart({0, 200});
+    // floor_line_collider.setEnd({(float)width, 200});
 
     // create a floor path
     VGPath floor_path =

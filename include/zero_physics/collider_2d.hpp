@@ -15,8 +15,16 @@
 #include <glm/glm.hpp>
 
 namespace zo {
+
+class CollisionSystem2d;
+
+/**
+ * @brief Base 2d Collider interface.
+ * This is a view into the collider data which is managed by the collision
+ * system.
+ *
+ */
 class Collider2d {
-  public:
   public:
     virtual ~Collider2d() = default;
     virtual void  setSensor(bool isSensor) = 0;
@@ -31,11 +39,15 @@ class Collider2d {
     virtual collider_handle_2d_t handle() const = 0;
     virtual ColliderType         type() const = 0;
 
-    template <typename T> T &as() {
-        return *dynamic_cast<T*>(this);
-    }
+    template <typename T> T &as() { return *dynamic_cast<T *>(this); }
 };
 
+/**
+ * @brief Circle collider interface.
+ * This is a view into the circle collider data which is managed by the
+ * collision system.
+ *
+ */
 class CircleCollider2d : virtual public Collider2d {
   public:
     virtual ~CircleCollider2d() = default;
@@ -47,6 +59,9 @@ class CircleCollider2d : virtual public Collider2d {
     virtual circle_2d_t circle() const = 0;
 
     ColliderType type() const override { return ColliderType::CIRCLE; }
+
+    static std::unique_ptr<CircleCollider2d>
+    create(CollisionSystem2d &collision_system);
 };
 
 class LineCollider2d : virtual public Collider2d {
@@ -60,6 +75,9 @@ class LineCollider2d : virtual public Collider2d {
     virtual line_segment_2d_t line() const = 0;
 
     ColliderType type() const override { return ColliderType::LINE; }
+
+    static std::unique_ptr<LineCollider2d>
+    create(CollisionSystem2d &collision_system);
 };
 
 class BoxCollider2d : virtual public Collider2d {
@@ -71,6 +89,9 @@ class BoxCollider2d : virtual public Collider2d {
     virtual float height() const = 0;
 
     ColliderType type() const override { return ColliderType::BOX; }
+
+    static std::unique_ptr<LineCollider2d>
+    create(CollisionSystem2d &collision_system);
 };
 }; // namespace zo
 

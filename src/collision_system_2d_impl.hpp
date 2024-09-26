@@ -15,6 +15,8 @@
 #include <zero_physics/memory.hpp>
 #include "collider_2d_impl.hpp"
 #include "types_impl.hpp"
+#include <optional>
+
 namespace zo {
 
 class CollisionSystem2dImpl : public CollisionSystem2d {
@@ -22,20 +24,18 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
     CollisionSystem2dImpl(size_t max_colliders);
     ~CollisionSystem2dImpl() = default;
 
-    std::unique_ptr<Collider2d>
-    createCollider(ColliderType type) override;
+    std::optional<collider_handle_2d_t> createCollider(ColliderType type);
 
     template <typename T> T &getColliderData(collider_handle_2d_t hndl) {
         if constexpr (std::is_same_v<T, CircleCollider2dImpl::Data>) {
             return *_circle_collider_pool.idxToPtr(hndl.index);
-        }
-        else if constexpr (std::is_same_v<T, LineCollider2dImpl::Data>) {
+        } else if constexpr (std::is_same_v<T, LineCollider2dImpl::Data>) {
             return *_line_collider_pool.idxToPtr(hndl.index);
         } else {
             static_assert(std::is_same_v<T, CircleCollider2dImpl::Data> ||
-                          std::is_same_v<T, LineCollider2dImpl::Data>, "Invalid collider type");
+                              std::is_same_v<T, LineCollider2dImpl::Data>,
+                          "Invalid collider type");
         }
-
     }
 
   private:
