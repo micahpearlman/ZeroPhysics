@@ -10,6 +10,7 @@
  */
 #include "physics_system_2d_impl.hpp"
 #include <zero_physics/math.hpp>
+
 namespace zo {
 
 CollisionSystem2dImpl::CollisionSystem2dImpl(size_t max_colliders)
@@ -21,6 +22,24 @@ CollisionSystem2dImpl::CollisionSystem2dImpl(size_t max_colliders)
     if (max_colliders > (1 << 28)) {
         throw std::runtime_error("max_colliders must be less than 2^28");
     }
+}
+
+void CollisionSystem2dImpl::destroyCollider(collider_handle_2d_t hndl) {
+    switch (hndl.type) {
+    case uint8_t(ColliderType::CIRCLE): {
+        _circle_collider_pool.deallocate(hndl.index);
+    } break;
+    case uint8_t(ColliderType::LINE): {
+        _line_collider_pool.deallocate(hndl.index);
+    } break;
+    default:
+        break;
+    }
+}
+
+void CollisionSystem2dImpl::destroyCollider(
+    std::unique_ptr<Collider2d> collider) {
+    destroyCollider(collider->handle());
 }
 
 std::shared_ptr<CollisionSystem2d>
@@ -115,7 +134,5 @@ void CollisionSystem2dImpl::generateCollisionPairs() {
         }
     }
 }
-
-
 
 } // namespace zo

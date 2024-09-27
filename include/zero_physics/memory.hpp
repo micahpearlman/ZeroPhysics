@@ -116,6 +116,15 @@ template <typename T> class MemoryPool {
         }
     }
 
+    void deallocate(size_t idx) {
+        if (idx > _pool_size || idx < 0) {
+            return; // out of bounds
+        }
+
+        deallocate(idxToPtr(idx));
+
+    }
+
     /**
      * @brief Constructs an object in place at the given pointer.
      *

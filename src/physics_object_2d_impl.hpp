@@ -36,6 +36,7 @@ class PhysicsObject2dImpl : public PhysicsObject2d {
 
   public:
     PhysicsObject2dImpl(PhysicsSystem2dImpl &sys, phy_obj_handle_2d_t hndl);
+    virtual ~PhysicsObject2dImpl();
 
     void      setMass(float mass) override;
     float     mass() const override;

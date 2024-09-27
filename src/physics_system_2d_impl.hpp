@@ -32,18 +32,60 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
 
     std::unique_ptr<PhysicsObject2d> createPhysicsObject() override;
     bool isPhysicsHandleValid(phy_obj_handle_2d_t hndl) const override;
+    void destroyPhysicsObject(phy_obj_handle_2d_t hndl) override;
+    void destroyPhysicsObject(std::unique_ptr<PhysicsObject2d> &obj) override;
+
 
     CollisionSystem2d &collisionSystem() override { return *_collision_system; }
 
   public: // Implementation specific
+    /// @brief Get the last time step
+    /// @return float the last time step
     float lastTimeStep() const { return _last_time_step; }
 
+    /// @brief Get the physics object store
+    /// @return The physics object store
     ComponentStore<PhysicsObject2dImpl::Data> &physicsObjects() {
         return _physics_objects;
     }
 
+    /// @brief Get the physics object data from the handle
+    /// @param hndl the handle
+    /// @return PhysicsObject2dImpl::Data& the physics object data
     PhysicsObject2dImpl::Data &physicsComponent(phy_obj_handle_2d_t hndl) {
         return _physics_objects.get(hndl)->get();
+    }
+
+    /// @brief Map a collider to a physics object.
+    /// @param c_hndl
+    /// @param p_hndl
+    void mapColliderToPhysicsObject(collider_handle_2d_t c_hndl,
+                                    phy_obj_handle_2d_t  p_hndl) {
+        _collider_map[c_hndl.handle] = p_hndl;
+    }
+
+    /// @brief Unmap a collider from a physics object.
+    /// @param c_hndl
+    void unmapColliderFromPhysicsObject(collider_handle_2d_t c_hndl) {
+      if (_collider_map.contains(c_hndl.handle) == false) {
+          return;
+      }
+        _collider_map.erase(c_hndl.handle);
+    }
+
+    /// @brief Get the physics object from the collider handle
+    /// @param c_hndl
+    /// @return phy_obj_handle_2d_t
+    std::optional<phy_obj_handle_2d_t>
+    physicsObjectMappedToCollider(collider_handle_2d_t c_hndl) {
+        if (_collider_map.contains(c_hndl.handle) == false) {
+            return std::nullopt;
+        }
+        if (isPhysicsHandleValid(_collider_map[c_hndl.handle]) == false) {
+            _collider_map.erase(c_hndl.handle);
+            return std::nullopt;
+        }
+        return _collider_map[c_hndl.handle];
     }
 
   private:
@@ -53,6 +95,9 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
     ComponentStore<PhysicsObject2dImpl::Data> _physics_objects;
 
     std::shared_ptr<CollisionSystem2dImpl> _collision_system;
+
+    // map collider to physics object
+    std::unordered_map<uint32_t, phy_obj_handle_2d_t> _collider_map;
 };
 
 } // namespace zo

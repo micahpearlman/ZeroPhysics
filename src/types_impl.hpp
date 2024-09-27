@@ -17,13 +17,17 @@
 namespace zo {
 
 /// @brief Implementation of a collider handle.  See types.hpp
-struct ColliderHandle {
-    /// @brief The type of collider (see: ColliderType). Packed into 4 bits.
-    uint8_t type : 4;
+union ColliderHandle {
+    struct {
+        /// @brief The type of collider (see: ColliderType). Packed into 4 bits.
+        uint8_t type : 4;
 
-    /// @brief The index of the collider in the memory pool. Packed into 28
-    /// bits. Note: the memory pool must be less than 2^28.
-    uint32_t index : 28;
+        /// @brief The index of the collider in the memory pool. Packed into 28
+        /// bits. Note: the memory pool must be less than 2^28.
+        uint32_t index : 28;
+    };
+
+    uint32_t handle;
 };
 
 /// @brief Implementation of a collision pair. See types.hpp

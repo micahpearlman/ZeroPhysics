@@ -19,7 +19,7 @@ using force_handle_2d_t = uint64_t;
 using phy_obj_handle_2d_t = uint64_t;
 
 // collider handle
-struct ColliderHandle;
+union ColliderHandle;
 using collider_handle_2d_t = ColliderHandle;
 
 // collider pair

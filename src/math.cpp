@@ -36,8 +36,8 @@ circleToLineSegment(const circle_2d_t &s, const line_segment_2d_t &ls) {
     glm::vec2 diff = s.center - closest_point;
     float squared_distance = glm::dot(diff, diff);
 
-    // if the distance is less than the radius of the circle then we have a
-    // collision
+    // if the distance is less than equal to the radius of the circle then we have a
+    // collision.  NOTE: using squared distance to avoid sqrt until we need it
     if (squared_distance <= s.radius * s.radius) {
         // calculate the normal
         glm::vec2 normal = glm::normalize(diff);

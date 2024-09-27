@@ -57,6 +57,14 @@ class PhysicsSystem2d {
     /// @return a handle to the physics object
     virtual std::unique_ptr<PhysicsObject2d> createPhysicsObject() = 0;
 
+    /// @brief destroys a physics object via its handle.
+    /// @param hndl 
+    virtual void destroyPhysicsObject(phy_obj_handle_2d_t hndl) = 0;
+    
+    /// @brief destroys a physics object via its unique pointer.
+    /// @param obj pointer to the physics object
+    virtual void destroyPhysicsObject(std::unique_ptr<PhysicsObject2d> &obj) = 0;
+
     /// @brief checks if the physics handle is valid
     /// @param hndl 
     /// @return true if the handle is valid

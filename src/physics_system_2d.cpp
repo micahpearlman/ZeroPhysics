@@ -14,6 +14,14 @@
 
 namespace zo {
 
+std::shared_ptr<PhysicsSystem2d> PhysicsSystem2d::create(size_t max_num_objects,
+                                                         int    iterations) {
+    PhysicsSystem2dImpl *impl =
+        new PhysicsSystem2dImpl(max_num_objects, iterations);
+    return std::shared_ptr<PhysicsSystem2d>(impl);
+}
+
+
 PhysicsSystem2dImpl::PhysicsSystem2dImpl(size_t max_number_object,
                                          float  iterations)
     : _iterations(iterations) {
@@ -59,8 +67,6 @@ void PhysicsSystem2dImpl::update(float dt) {
                             ->getColliderData<CircleCollider2dImpl::Data>(
                                 data.collider);
                     collider.circle.center = data.position;
-                    std::cout << "PHY OBJ POSITION: " << data.position.x << ", "
-                              << data.position.y << std::endl;
                 } else if (data.collider.type == uint8_t(ColliderType::LINE)) {
                     auto &collider =
                         _collision_system
@@ -78,6 +84,51 @@ void PhysicsSystem2dImpl::update(float dt) {
 
     // update the collision system
     _collision_system->generateCollisionPairs();
+
+    // resolve collisions
+    for (const CollisionPair &pair : _collision_system->collisionPairs()) {
+        // auto &a = _physics_objects.get(pair.a)->get();
+        // auto &b = _physics_objects.get(pair.b)->get();
+        // if (a.mass <= 0 && b.mass <= 0) {
+        //     continue;
+        // }
+        // if (a.mass <= 0) {
+        //     // resolve b
+        //     glm::vec2 normal = pair.normal;
+        //     glm::vec2 contact = pair.contact;
+        //     float     penetration = pair.penetration;
+        //     b.position += normal * penetration;
+        //     glm::vec2 relative_velocity = b.velocity;
+        //     float     separating_velocity = glm::dot(relative_velocity, normal);
+        //     if (separating_velocity < 0) {
+        //         b.velocity -= separating_velocity * normal;
+        //     }
+        // } else if (b.mass <= 0) {
+        //     // resolve a
+        //     glm::vec2 normal = pair.normal;
+        //     glm::vec2 contact = pair.contact;
+        //     float     penetration = pair.penetration;
+        //     a.position -= normal * penetration;
+        //     glm::vec2 relative_velocity = a.velocity;
+        //     float     separating_velocity = glm::dot(relative_velocity, normal);
+        //     if (separating_velocity < 0) {
+        //         a.velocity -= separating_velocity * normal;
+        //     }
+        // } else {
+        //     // resolve both
+        //     glm::vec2 normal = pair.normal;
+        //     glm::vec2 contact = pair.contact;
+        //     float     penetration = pair.penetration;
+        //     a.position -= normal * (penetration / 2.0f);
+        //     b.position += normal * (penetration / 2.0f);
+        //     glm::vec2 relative_velocity = a.velocity - b.velocity;
+        //     float     separating_velocity = glm::dot(relative_velocity, normal);
+        //     if (separating_velocity < 0) {
+        //         a.velocity -= separating_velocity * normal;
+        //         b.velocity += separating_velocity * normal;
+        //     }
+        // }
+    }
 }
 
 force_handle_2d_t PhysicsSystem2dImpl::addGlobalForce(const glm::vec2 &f) {
@@ -103,12 +154,24 @@ std::unique_ptr<PhysicsObject2d> PhysicsSystem2dImpl::createPhysicsObject() {
     return std::make_unique<PhysicsObject2dImpl>(*this, hndl);
 }
 
-std::shared_ptr<PhysicsSystem2d> PhysicsSystem2d::create(size_t max_num_objects,
-                                                         int    iterations) {
-    PhysicsSystem2dImpl *impl =
-        new PhysicsSystem2dImpl(max_num_objects, iterations);
-    return std::shared_ptr<PhysicsSystem2d>(impl);
+void PhysicsSystem2dImpl::destroyPhysicsObject(phy_obj_handle_2d_t hndl) {
+    auto phy_data = _physics_objects.get(hndl);
+    if (phy_data.has_value() == false) {
+        return;
+    }
+    PhysicsObject2dImpl::Data *data = &phy_data->get();
+    if (data->collider.index != 0xfffffff) {
+        _collision_system->destroyCollider(data->collider);
+    }
+    _physics_objects.remove(hndl);
 }
+
+void PhysicsSystem2dImpl::destroyPhysicsObject(std::unique_ptr<PhysicsObject2d> &obj) {
+    auto hndl = obj->handle();
+    destroyPhysicsObject(hndl);
+}
+
+
 
 bool PhysicsSystem2dImpl::isPhysicsHandleValid(phy_obj_handle_2d_t hndl) const {
     return _physics_objects.get(hndl).has_value();

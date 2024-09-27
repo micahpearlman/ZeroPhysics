@@ -16,6 +16,12 @@ PhysicsObject2dImpl::PhysicsObject2dImpl(PhysicsSystem2dImpl &sys,
                                          phy_obj_handle_2d_t  hndl)
     : _sys(sys), _hndl(hndl) {}
 
+PhysicsObject2dImpl::~PhysicsObject2dImpl() {
+    if (isValid()) {
+        _sys.destroyPhysicsObject(_hndl);
+    }
+}
+
 void PhysicsObject2dImpl::setMass(float mass) { data().mass = mass; }
 
 float PhysicsObject2dImpl::mass() const { return data().mass; }
@@ -63,9 +69,10 @@ void PhysicsObject2dImpl::setStatic(bool is_static) {
 
 bool PhysicsObject2dImpl::isStatic() const { return data().mass <= 0.0f; }
 
-void PhysicsObject2dImpl::setCollider(collider_handle_2d_t hndl, uint32_t vertex) {
+void PhysicsObject2dImpl::setCollider(collider_handle_2d_t col_hndl, uint32_t vertex) {
     data().collider_vertex = vertex;
-    data().collider = hndl;
+    data().collider = col_hndl;
+    _sys.mapColliderToPhysicsObject(col_hndl, handle());
 }
 
 void PhysicsObject2dImpl::setCollider(Collider2d &collider, uint32_t vertex) {

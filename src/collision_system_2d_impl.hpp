@@ -25,6 +25,12 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
     CollisionSystem2dImpl(size_t max_colliders);
     ~CollisionSystem2dImpl() = default;
 
+    void destroyCollider(collider_handle_2d_t hndl) override;
+    void destroyCollider(std::unique_ptr<Collider2d> collider) override;
+
+    /// @brief create a collider of a specific type
+    /// @param type 
+    /// @return 
     std::optional<collider_handle_2d_t> createCollider(ColliderType type);
 
     template <typename T> T &getColliderData(collider_handle_2d_t hndl) {
@@ -40,6 +46,10 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
     }
 
     void generateCollisionPairs() override;
+
+    /// @brief Get the collision pairs
+    /// @return 
+    std::vector<CollisionPair, MemoryPool<CollisionPair>> &collisionPairs() { return _collision_pairs; }
 
 
   private:

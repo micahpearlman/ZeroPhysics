@@ -43,6 +43,14 @@ public:
         }
     }
 
+    /// @brief Destroy a collider.
+    /// @param hndl The handle to the collider to destroy.
+    virtual void destroyCollider(collider_handle_2d_t hndl) = 0;
+
+    /// @brief Destroy a collider.
+    /// @param collider The collider to destroy.
+    virtual void destroyCollider(std::unique_ptr<Collider2d> collider) = 0;
+
     /// @brief Run the collision system generating collision pairs.
     virtual void generateCollisionPairs() = 0;
 
