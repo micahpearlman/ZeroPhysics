@@ -10,9 +10,12 @@
  */
 #ifndef __zo_physics_object_h__
 #define __zo_physics_object_h__
+
+#include <zero_physics/collider_2d.hpp>
 #include <zero_physics/types.hpp>
 #include <glm/glm.hpp>
 #include <memory>
+
 namespace zo {
 class PhysicsSystem2d;
 /// @brief Interface for a 2d physics object. This is a view into the physics
@@ -72,6 +75,18 @@ class PhysicsObject2d {
     /// @brief Check if the physics object is static.
     /// @return bool true if the physics object is static
     virtual bool                isStatic() const = 0;
+
+    /// @brief Add a collider to the physics object.
+    /// @param hndl The handle to the collider to add.
+    /// @param vertex The vertex on the collider that this physics object controls. 
+    ///   For a circle this is always 0.  For a line this is 0 or 1. For a polygon this is 0 to n-1.
+    virtual void setCollider(collider_handle_2d_t hndl, uint32_t vertex) = 0;
+
+    /// @brief Add a collider to the physics object.
+    /// @param collider The collider to add.
+    /// @param vertex The vertex on the collider that this physics object controls.
+    ///  For a circle this is always 0.  For a line this is 0 or 1. For a polygon this is 0 to n-1.
+    virtual void setCollider(Collider2d& collider, uint32_t vertex) = 0;
 
     /// @brief  Get the handle to the physics object.
     /// @return phy_obj_handle_2d_t handle to the physics object

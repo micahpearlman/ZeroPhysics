@@ -63,6 +63,15 @@ void PhysicsObject2dImpl::setStatic(bool is_static) {
 
 bool PhysicsObject2dImpl::isStatic() const { return data().mass <= 0.0f; }
 
+void PhysicsObject2dImpl::setCollider(collider_handle_2d_t hndl, uint32_t vertex) {
+    data().collider_vertex = vertex;
+    data().collider = hndl;
+}
+
+void PhysicsObject2dImpl::setCollider(Collider2d &collider, uint32_t vertex) {
+    setCollider(collider.handle(), vertex);
+}
+
 phy_obj_handle_2d_t PhysicsObject2dImpl::handle() const { return _hndl; }
 
 PhysicsObject2dImpl::Data &PhysicsObject2dImpl::data() {

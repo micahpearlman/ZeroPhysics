@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
 
     VGPaint stroke_paint = vgCreatePaint();
     vgSetPaint(stroke_paint, VG_STROKE_PATH);
-    VGfloat stroke_color[4] = {1.0f, 0.0f, 0.0f, 1.0f};
+    VGfloat stroke_color[4] = {0.0f, 0.0f, 1.0f, 1.0f};
     vgSetParameterfv(stroke_paint, VG_PAINT_COLOR, 4, &stroke_color[0]);
 
     // create a simple box path
@@ -145,43 +145,39 @@ int main(int argc, char **argv) {
         zo::PhysicsSystem2d::create(1024, 1);
 
     // create a physics object
-    std::unique_ptr<zo::PhysicsObject2d> phy_obj =
+    std::unique_ptr<zo::PhysicsObject2d> ball_phy_obj =
         physics_system->createPhysicsObject();
-    phy_obj->setPosition({100, 100});
+    ball_phy_obj->setPosition({100, 100});
+    ball_phy_obj->setVelocity({10, 0});
 
+    // create a circle collider
+    zo::CollisionSystem2d &collision_system = physics_system->collisionSystem();
+    std::unique_ptr<zo::CircleCollider2d> circle_collider =
+        collision_system.createCollider<zo::CircleCollider2d>();
+    circle_collider->setRadius(15.0f);
+    ball_phy_obj->setCollider(*circle_collider, 0);
+
+    // add some gravity
     physics_system->addGlobalForce({0, 9.8f});
-    phy_obj->setVelocity({10, 0});
 
     // create a small vg circle to represent the physics object
     VGPath circle = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
                                  0, 0, 0, VG_PATH_CAPABILITY_ALL);
     vguEllipse(circle, 0.0f, 0.0f, 30.0f, 30.0f);
 
-    // FIXME:  this is not working ~V BELOW ~V
-    // create a floor physics object and render object
-    // std::unique_ptr<zo::PhysicsObject2d> floor =
-    // physics_system->createPhysicsObject(); floor->setMass(-1.0f);  //
-    // infinite mass floor->setPosition({0, 200}); floor->setStatic(true);  //
-    // TODO: FIXME: this is not working
-
     // floor collider
-    zo::CollisionSystem2d &collision_system = physics_system->collisionSystem();
-    std::unique_ptr<zo::LineCollider2d> line_collider = collision_system.createCollider<zo::LineCollider2d>();
+    std::unique_ptr<zo::LineCollider2d> line_collider =
+        collision_system.createCollider<zo::LineCollider2d>();
 
-    // std::unique_ptr<zo::Collider2d> floor_collider =
-    //     collision_system.createCollider(zo::ColliderType::LINE);
-    // zo::LineCollider2d& floor_line_collider = floor_collider->as<zo::LineCollider2d>();
-
-    // // std::unique_ptr<zo::LineCollider2d> floor_line_collider =
-    // //     std::make_unique<zo::LineCollider2d>(floor_collider.release());
-    // floor_line_collider.setStart({0, 200});
-    // floor_line_collider.setEnd({(float)width, 200});
+    zo::line_segment_2d_t floor_segment = {{0, 200}, {(float)width, 200}};
+    line_collider->setLine(floor_segment);
 
     // create a floor path
     VGPath floor_path =
         vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1, 0, 0, 0,
                      VG_PATH_CAPABILITY_ALL);
-    vguRect(floor_path, 0.0f, height - 10.0f, width, 10.0f);
+    vguLine(floor_path, floor_segment.start.x, floor_segment.start.y,
+            floor_segment.end.x, floor_segment.end.y);
 
     float  last_time = glfwGetTime();
     double previous_seconds = glfwGetTime();
@@ -207,13 +203,13 @@ int main(int argc, char **argv) {
         // draw the floor
         vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
         vgLoadIdentity();
-        vgSetPaint(fill_paint, VG_FILL_PATH);
+        vgSetf(VG_STROKE_LINE_WIDTH, 5.0f);
         vgSetPaint(stroke_paint, VG_STROKE_PATH);
-        vgDrawPath(floor_path, VG_FILL_PATH | VG_STROKE_PATH);
+        vgDrawPath(floor_path, VG_STROKE_PATH);
 
         // draw object
         vgLoadIdentity();
-        glm::vec2 pos = phy_obj->position();
+        glm::vec2 pos = ball_phy_obj->position();
         vgTranslate(pos.x, pos.y);
         // fill and stroke paints
         vgSetPaint(fill_paint, VG_FILL_PATH);

@@ -12,6 +12,7 @@
 #define __zo_physics_object_2d_impl_h__
 
 #include <zero_physics/physics_object_2d.hpp>
+#include "types_impl.hpp"
 
 namespace zo {
 
@@ -24,29 +25,34 @@ class PhysicsObject2dImpl : public PhysicsObject2d {
   public:
     /// @brief The data for a physics object
     struct alignas(std::max_align_t) Data {
-        glm::vec2                                       position = {0, 0};
-        glm::vec2                                       prev_position = {0, 0};
-        glm::vec2                                       acceleration = {0, 0};
-        glm::vec2                                       force = {0, 0};
-        float                                           mass = 1;
+        glm::vec2 position = {0, 0};
+        glm::vec2 prev_position = {0, 0};
+        glm::vec2 acceleration = {0, 0};
+        glm::vec2 force = {0, 0};
+        collider_handle_2d_t collider = {uint16_t(ColliderType::MAX), 0xfffffff};
+        uint32_t collider_vertex = 0;
+        float     mass = 1;
     };
 
   public:
     PhysicsObject2dImpl(PhysicsSystem2dImpl &sys, phy_obj_handle_2d_t hndl);
 
-    void                setMass(float mass) override;
-    float               mass() const override;
-    void                setPosition(const glm::vec2 &p) override;
-    glm::vec2           position() const override;
-    void                setVelocity(const glm::vec2 &v) override;
-    glm::vec2           velocity() const override;
-    void                setAcceleration(const glm::vec2 &a) override;
-    glm::vec2           acceleration() const override;
-    void                addForce(const glm::vec2 &f) override;
-    void                zeroForce() override;
-    bool                isValid() const override;
-    void                setStatic(bool is_static) override;
-    bool                isStatic() const override;
+    void      setMass(float mass) override;
+    float     mass() const override;
+    void      setPosition(const glm::vec2 &p) override;
+    glm::vec2 position() const override;
+    void      setVelocity(const glm::vec2 &v) override;
+    glm::vec2 velocity() const override;
+    void      setAcceleration(const glm::vec2 &a) override;
+    glm::vec2 acceleration() const override;
+    void      addForce(const glm::vec2 &f) override;
+    void      zeroForce() override;
+    bool      isValid() const override;
+    void      setStatic(bool is_static) override;
+    bool      isStatic() const override;
+    void      setCollider(collider_handle_2d_t hndl, uint32_t vertex) override;
+    void      setCollider(Collider2d &collider, uint32_t vertex) override;
+
     phy_obj_handle_2d_t handle() const override;
 
     PhysicsObject2dImpl::Data       &data();

@@ -156,6 +156,8 @@ template <typename T> class MemoryPool {
     T *idxToPtr(size_t idx) { return &_pool[idx].object; }
 
   private:
+
+    /// @brief A union to store the object *OR* the next free index.
     union alignas(std::max_align_t) MemoryPoolElement {
         T      object;
         size_t next;

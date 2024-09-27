@@ -18,7 +18,7 @@ namespace zo {
 /// @param p
 /// @param ls
 /// @return glm::vec2 point on line segment closest to p.
-glm::vec2 closest_point_on_line_segment(const glm::vec2         &p,
+glm::vec2 closestPointOnLineSegment(const glm::vec2         &p,
                                         const line_segment_2d_t &ls);
 
 /// @brief collide circle with line segment
@@ -26,7 +26,7 @@ glm::vec2 closest_point_on_line_segment(const glm::vec2         &p,
 /// @param ls
 /// @return optional<contact_2d_t> contact information or std::nullopt if no
 /// collision
-std::optional<contact_2d_t> circle_to_line_segment(const circle_2d_t       &s,
+std::optional<contact_2d_t> circleToLineSegment(const circle_2d_t       &s,
                                                    const line_segment_2d_t &ls);
 
 } // namespace zo

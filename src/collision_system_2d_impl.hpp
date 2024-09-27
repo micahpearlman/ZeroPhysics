@@ -16,6 +16,7 @@
 #include "collider_2d_impl.hpp"
 #include "types_impl.hpp"
 #include <optional>
+#include <vector>
 
 namespace zo {
 
@@ -38,9 +39,16 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
         }
     }
 
+    void generateCollisionPairs() override;
+
+
   private:
     MemoryPool<CircleCollider2dImpl::Data> _circle_collider_pool;
     MemoryPool<LineCollider2dImpl::Data>   _line_collider_pool;
+    ComponentStore<ColliderHandle>         _colliders;
+
+    MemoryPool<CollisionPair> _collision_pair_pool;
+    std::vector<CollisionPair, MemoryPool<CollisionPair>> _collision_pairs;
 };
 
 } // namespace zo

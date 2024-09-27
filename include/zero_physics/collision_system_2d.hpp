@@ -13,6 +13,7 @@
 #include <zero_physics/types.hpp>
 #include <zero_physics/collider_2d.hpp>
 #include <memory>
+#include <optional>
 namespace zo {
 class CollisionSystem2d {
 public:
@@ -25,6 +26,12 @@ public:
 
     virtual ~CollisionSystem2d() = default;
 
+
+
+    /// @brief Create a collider of a specific type.
+    /// The collider will be added into the collision system.
+    /// @tparam T The type of collider to create (CircleCollider2d,LineCollider2d, etc)
+    /// @return Unique pointer to the collider
     template<typename T>
     std::unique_ptr<T> createCollider() {
         if constexpr (std::is_same_v<T, CircleCollider2d>) {
@@ -36,7 +43,11 @@ public:
         }
     }
 
-    // virtual std::unique_ptr<Collider2d> createCollider(ColliderType type) = 0;
+    /// @brief Run the collision system generating collision pairs.
+    virtual void generateCollisionPairs() = 0;
+
+
+
 };
 
 }
