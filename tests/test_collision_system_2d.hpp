@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <zero_physics/collision_system_2d.hpp>
 #include <zero_physics/collider_2d.hpp>
+#include <zero_physics/types.hpp>
 
 using namespace zo;
 
@@ -28,19 +29,19 @@ TEST_F(CollisionSystem2dTest, CreateCollisionSystem) {
 }
 
 TEST_F(CollisionSystem2dTest, CreateCollider) {
-    auto collider = collisionSystem->createCollider(Collider2d::ColliderType::CIRCLE);
+    auto collider = collisionSystem->createCollider<CircleCollider2d>();
     ASSERT_NE(collider, nullptr);
-    EXPECT_EQ(collider->type(), Collider2d::ColliderType::CIRCLE);
+    EXPECT_EQ(collider->type(), ColliderType::CIRCLE);
 }
 
 TEST_F(CollisionSystem2dTest, CreateColliderToExhaustion) {
     for (size_t i = 0; i < 100; ++i) {
-        auto collider = collisionSystem->createCollider(Collider2d::ColliderType::CIRCLE);
+        auto collider = collisionSystem->createCollider<CircleCollider2d>();
         ASSERT_NE(collider, nullptr);
-        EXPECT_EQ(collider->type(), Collider2d::ColliderType::CIRCLE);
+        EXPECT_EQ(collider->type(), ColliderType::CIRCLE);
     }
 
-    auto collider = collisionSystem->createCollider(Collider2d::ColliderType::CIRCLE);
+    auto collider = collisionSystem->createCollider<CircleCollider2d>();
     EXPECT_EQ(collider, nullptr);
 
 } // namespace zo

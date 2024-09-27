@@ -140,12 +140,25 @@ TEST_F(MemoryPoolTest, AllocateUntilExhaustion) {
 
 TEST_F(MemoryPoolTest, UseAsStdAllocator) {
     std::vector<TestComponent, MemoryPool<TestComponent>> vec(pool);
+
+    // add some elements
     vec.push_back(TestComponent{42});
     vec.push_back(TestComponent{84});
 
+
+    // check the elements
     ASSERT_EQ(vec.size(), 2);
     EXPECT_EQ(vec[0].value, 42);
     EXPECT_EQ(vec[1].value, 84);
+
+    // remove a element from the end
+    vec.pop_back();
+    EXPECT_EQ(vec.size(), 1);
+    EXPECT_EQ(vec[0].value, 42);    
+
+    // clear the vector and check
+    vec.clear();
+    EXPECT_EQ(vec.size(), 0);
 }
 
 TEST_F(MemoryPoolTest, PtrToIdx) {
