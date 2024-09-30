@@ -82,11 +82,11 @@ void PhysicsObject2dImpl::setCollider(Collider2d &collider, uint32_t vertex) {
 phy_obj_handle_2d_t PhysicsObject2dImpl::handle() const { return _hndl; }
 
 PhysicsObject2dImpl::Data &PhysicsObject2dImpl::data() {
-    return _sys.physicsComponent(_hndl);
+    return _sys.physicsObjectData(_hndl);
 }
 
 const PhysicsObject2dImpl::Data &PhysicsObject2dImpl::data() const {
-    return _sys.physicsComponent(_hndl);
+    return _sys.physicsObjectData(_hndl);
 }
 
 } // namespace zo

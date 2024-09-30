@@ -20,14 +20,14 @@ namespace zo {
 class CollisionSystem2dImpl;
 
 class Collider2dImpl : virtual public Collider2d {
-  protected:
+  public:
     struct alignas(std::max_align_t) Data {
-        uint8_t  type;
-        bool     is_sensor;
-        float    friction;
-        float    restitution;
-        uint16_t category_bits;
-        uint16_t mask_bits;
+        uint8_t  type = uint8_t(ColliderType::MAX);
+        bool     is_sensor = false;
+        float    friction = 0.0f;
+        float    restitution = 0.8f;
+        uint16_t category_bits = 0;
+        uint16_t mask_bits = 0;
     };
 
     CollisionSystem2dImpl &_sys;

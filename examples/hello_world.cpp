@@ -147,8 +147,8 @@ int main(int argc, char **argv) {
     // create a physics object
     std::unique_ptr<zo::PhysicsObject2d> ball_phy_obj =
         physics_system->createPhysicsObject();
-    ball_phy_obj->setPosition({100, 100});
-    ball_phy_obj->setVelocity({10, 0});
+    ball_phy_obj->setPosition({300, 100});
+    ball_phy_obj->setVelocity({500, 0});
 
     // create a circle collider
     zo::CollisionSystem2d &collision_system = physics_system->collisionSystem();
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
     ball_phy_obj->setCollider(*circle_collider, 0);
 
     // add some gravity
-    physics_system->addGlobalForce({0, 9.8f});
+    physics_system->addGlobalForce({0, 120.0f});
 
     // create a small vg circle to represent the physics object
     VGPath circle = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
@@ -166,18 +166,36 @@ int main(int argc, char **argv) {
     vguEllipse(circle, 0.0f, 0.0f, 30.0f, 30.0f);
 
     // floor collider
-    std::unique_ptr<zo::LineCollider2d> line_collider =
+    std::unique_ptr<zo::LineCollider2d> floor_col =
         collision_system.createCollider<zo::LineCollider2d>();
 
-    zo::line_segment_2d_t floor_segment = {{0, 200}, {(float)width, 200}};
-    line_collider->setLine(floor_segment);
+    zo::line_segment_2d_t floor_segment = {{0, 400}, {(float)width, 400}};
+    floor_col->setLine(floor_segment);
+
+    // right wall collider
+    std::unique_ptr<zo::LineCollider2d> right_wall_col =
+        collision_system.createCollider<zo::LineCollider2d>();
+    zo::line_segment_2d_t right_wall_segment = {{(float)width-200, floor_segment.start.y},
+                                                {(float)width-200, 0}};
+    right_wall_col->setLine(right_wall_segment);
+
+    // left wall collider
+    std::unique_ptr<zo::LineCollider2d> left_wall_col =
+        collision_system.createCollider<zo::LineCollider2d>();
+    zo::line_segment_2d_t left_wall_segment = {{200, floor_segment.start.y},
+                                                {200, 0}};
+    left_wall_col->setLine(left_wall_segment);
 
     // create a floor path
-    VGPath floor_path =
+    VGPath box_path =
         vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1, 0, 0, 0,
                      VG_PATH_CAPABILITY_ALL);
-    vguLine(floor_path, floor_segment.start.x, floor_segment.start.y,
+    vguLine(box_path, floor_segment.start.x, floor_segment.start.y,
             floor_segment.end.x, floor_segment.end.y);
+    vguLine(box_path, right_wall_segment.start.x, right_wall_segment.start.y,
+            right_wall_segment.end.x, right_wall_segment.end.y);
+    vguLine(box_path, left_wall_segment.start.x, left_wall_segment.start.y,
+            left_wall_segment.end.x, left_wall_segment.end.y);
 
     float  last_time = glfwGetTime();
     double previous_seconds = glfwGetTime();
@@ -205,7 +223,7 @@ int main(int argc, char **argv) {
         vgLoadIdentity();
         vgSetf(VG_STROKE_LINE_WIDTH, 5.0f);
         vgSetPaint(stroke_paint, VG_STROKE_PATH);
-        vgDrawPath(floor_path, VG_STROKE_PATH);
+        vgDrawPath(box_path, VG_STROKE_PATH);
 
         // draw object
         vgLoadIdentity();

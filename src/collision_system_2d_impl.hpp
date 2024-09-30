@@ -45,6 +45,8 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
         }
     }
 
+    Collider2dImpl::Data& getBaseColliderData(collider_handle_2d_t hndl);
+
     void generateCollisionPairs() override;
 
     /// @brief Get the collision pairs

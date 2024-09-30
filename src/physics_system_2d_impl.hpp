@@ -35,7 +35,6 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
     void destroyPhysicsObject(phy_obj_handle_2d_t hndl) override;
     void destroyPhysicsObject(std::unique_ptr<PhysicsObject2d> &obj) override;
 
-
     CollisionSystem2d &collisionSystem() override { return *_collision_system; }
 
   public: // Implementation specific
@@ -52,7 +51,7 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
     /// @brief Get the physics object data from the handle
     /// @param hndl the handle
     /// @return PhysicsObject2dImpl::Data& the physics object data
-    PhysicsObject2dImpl::Data &physicsComponent(phy_obj_handle_2d_t hndl) {
+    PhysicsObject2dImpl::Data &physicsObjectData(phy_obj_handle_2d_t hndl) {
         return _physics_objects.get(hndl)->get();
     }
 
@@ -67,9 +66,9 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
     /// @brief Unmap a collider from a physics object.
     /// @param c_hndl
     void unmapColliderFromPhysicsObject(collider_handle_2d_t c_hndl) {
-      if (_collider_map.contains(c_hndl.handle) == false) {
-          return;
-      }
+        if (_collider_map.contains(c_hndl.handle) == false) {
+            return;
+        }
         _collider_map.erase(c_hndl.handle);
     }
 

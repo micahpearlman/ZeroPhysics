@@ -80,13 +80,31 @@ CollisionSystem2dImpl::createCollider(ColliderType type) {
     return std::nullopt;
 }
 
+Collider2dImpl::Data &CollisionSystem2dImpl::getBaseColliderData(
+    collider_handle_2d_t hndl) {
+    switch (hndl.type) {
+    case uint8_t(ColliderType::CIRCLE): {
+        return getColliderData<CircleCollider2dImpl::Data>(hndl);
+    } break;
+    case uint8_t(ColliderType::LINE): {
+        return getColliderData<LineCollider2dImpl::Data>(hndl);
+    } break;
+    default:
+        break;
+    }
+    throw std::runtime_error("Unsupported collider type");
+}
+
 void CollisionSystem2dImpl::generateCollisionPairs() {
     // clear the collision pairs
     _collision_pairs.clear();
 
     // generate collision pairs
-    for (const ColliderHandle &c1 : _colliders) {
-        for (const ColliderHandle &c2 : _colliders) {
+    // O(n^2) collision detection. TODO: implement broadphase collision detection
+    for (auto iter1 = _colliders.begin(); iter1 != _colliders.end(); ++iter1) {
+        const ColliderHandle &c1 = *iter1;
+        for (auto iter2 = iter1 + 1; iter2 != _colliders.end(); iter2++) {
+            const ColliderHandle &c2 = *iter2;
             if (c1.index == c2.index && c1.type == c2.type) {
                 continue;
             }
