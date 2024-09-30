@@ -212,6 +212,7 @@ int main(int argc, char **argv) {
 
         // update the physics system
         float delta_time = glfwGetTime() - last_time;
+        delta_time = std::min(delta_time, 0.1f);
         physics_system->update(delta_time);
         last_time = glfwGetTime();
 

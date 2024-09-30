@@ -150,7 +150,7 @@ void PhysicsSystem2dImpl::update(float dt) {
             data.position += pair.contact.normal * pair.contact.penetration;
 
             // adjust previous position based on impulse
-            // data.prev_position += impulse_vector * (data.mass / total_mass);
+            // data.prev_position -= impulse_vector * (data.mass / total_mass);
             data.prev_position = data.position + (impulse_vector * (data.mass / total_mass));
         }
 
@@ -166,7 +166,8 @@ void PhysicsSystem2dImpl::update(float dt) {
 
 
             // adjust previous position based on impulse
-            data.prev_position -= impulse_vector * (data.mass / total_mass);
+            //data.prev_position -= impulse_vector * (data.mass / total_mass);
+            data.prev_position = data.position + (impulse_vector * (data.mass / total_mass));
         }
 
     }
