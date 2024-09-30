@@ -13,6 +13,7 @@
 
 #include <zero_physics/types.hpp>
 #include <glm/glm.hpp>
+#include <memory>
 
 namespace zo {
 

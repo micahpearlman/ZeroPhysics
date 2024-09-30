@@ -8,7 +8,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
     add_compile_options(-Wno-deprecated-enum-enum-conversion)
 endif()
 
-find_package(glfw3 3.4 REQUIRED)
+find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 if (APPLE)

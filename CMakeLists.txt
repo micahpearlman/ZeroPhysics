@@ -8,6 +8,9 @@ set(CMAKE_CXX_STANDARD 20)
 cmake_policy(SET CMP0077 NEW)
 option(ZOPHY_BUILD_EXAMPLES "Build examples" ON)
 
+# prefer vendor opengl
+set(OpenGL_GL_PREFERENCE "GLVND")
+
 
 ## Thirdparty
 set(GLM_ENABLE_CXX_20 ON)
