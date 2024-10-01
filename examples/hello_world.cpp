@@ -234,8 +234,9 @@ int main(int argc, char **argv) {
         vgLoadIdentity();
         vgTranslate(pos.x, pos.y);
         vgClearPath(velocity_vector_1, VG_PATH_CAPABILITY_ALL);
-        vgAppendPathData(velocity_vector_1, 2, (VGubyte[]){VG_MOVE_TO_ABS, VG_LINE_TO_ABS},
-                         (VGfloat[]){0, 0, vel.x, vel.y});
+        VGubyte commands[] = {VG_MOVE_TO_ABS, VG_LINE_TO_ABS};
+        VGfloat coords[] = {0, 0, vel.x, vel.y};
+        vgAppendPathData(velocity_vector_1, 2, commands, coords);
         vgDrawPath(velocity_vector_1, VG_STROKE_PATH);
 
 
@@ -257,8 +258,9 @@ int main(int argc, char **argv) {
         vgLoadIdentity();
         vgTranslate(pos.x, pos.y);
         vgClearPath(velocity_vector_2, VG_PATH_CAPABILITY_ALL);
-        vgAppendPathData(velocity_vector_2, 2, (VGubyte[]){VG_MOVE_TO_ABS, VG_LINE_TO_ABS},
-                         (VGfloat[]){0, 0, vel.x, vel.y});
+        VGubyte commands_2[] = {VG_MOVE_TO_ABS, VG_LINE_TO_ABS};
+        VGfloat coords_2[] = {0, 0, vel.x, vel.y};
+        vgAppendPathData(velocity_vector_2, 2, commands_2, coords_2);
         vgDrawPath(velocity_vector_2, VG_STROKE_PATH);
 
 
