@@ -100,30 +100,31 @@ void CollisionSystem2dImpl::generateCollisionPairs() {
     // generate collision pairs
     // O(n^2) collision detection. TODO: implement broadphase collision
     // detection
-    for (auto iter1 = _colliders.begin(); iter1 != _colliders.end(); ++iter1) {
-        const ColliderHandle &c1 = *iter1;
-        for (auto iter2 = iter1 + 1; iter2 != _colliders.end(); iter2++) {
-            const ColliderHandle &c2 = *iter2;
+    for (int i = 0; i < _colliders.size(); i++) {
+        const ColliderHandle &c1 = _colliders.at(i);
+        for (int p = i + 1; p < _colliders.size(); p++) {
+            const ColliderHandle &c2 = _colliders.at(p);
             if (c1.index == c2.index && c1.type == c2.type) {
                 continue;
             }
 
+            contact_2d_t contact;
+
             // check for collision
             if (c1.type == uint8_t(ColliderType::CIRCLE) &&
                 c2.type == uint8_t(ColliderType::CIRCLE)) {
-                auto &c1_data = getColliderData<CircleCollider2dImpl::Data>(c1);
-                auto &c2_data = getColliderData<CircleCollider2dImpl::Data>(c2);
-                std::optional<contact_2d_t> contact =
-                    circleToCircle(c1_data.circle, c2_data.circle);
-                if (contact.has_value()) {
-                    CollisionPair pair = {c1, c2, contact.value()};
-                    _collision_pairs.push_back(pair);
+                const auto &c1_data = getColliderData<CircleCollider2dImpl::Data>(c1);
+                const auto &c2_data = getColliderData<CircleCollider2dImpl::Data>(c2);
+
+                if (circleToCircle(c1_data.circle, c2_data.circle, contact)) {
+                    CollisionPair pair = {c1, c2, contact};
+                    _collision_pairs.emplace_back(pair);
                 }
 
             } else if (c1.type == uint8_t(ColliderType::LINE) &&
                        c2.type == uint8_t(ColliderType::LINE)) {
-                auto &c1_data = getColliderData<LineCollider2dImpl::Data>(c1);
-                auto &c2_data = getColliderData<LineCollider2dImpl::Data>(c2);
+                const auto &c1_data = getColliderData<LineCollider2dImpl::Data>(c1);
+                const auto &c2_data = getColliderData<LineCollider2dImpl::Data>(c2);
                 // do line to line collision
                 // if (lineToLine(c1_data, c2_data)) {
                 //     CollisionPair pair = {c1, c2};
@@ -131,32 +132,23 @@ void CollisionSystem2dImpl::generateCollisionPairs() {
                 // }
             } else if (c1.type == uint8_t(ColliderType::CIRCLE) &&
                        c2.type == uint8_t(ColliderType::LINE)) {
-                auto &c1_data = getColliderData<CircleCollider2dImpl::Data>(c1);                
-                auto &c2_data = getColliderData<LineCollider2dImpl::Data>(c2);
-                std::optional<contact_2d_t> contact =
-                    circleToLineSegment(c1_data.circle, c2_data.line);
-                if (contact.has_value()) {
-                    CollisionPair pair = {c1, c2, contact.value()};
-                    assert(pair.a.type == uint8_t(ColliderType::CIRCLE));
-                    assert(pair.b.type == uint8_t(ColliderType::LINE));
-                    _collision_pairs.push_back(pair);
+                const auto &c1_data = getColliderData<CircleCollider2dImpl::Data>(c1);                
+                const auto &c2_data = getColliderData<LineCollider2dImpl::Data>(c2);
+                if (circleToLineSegment(c1_data.circle, c2_data.line, contact)) {
+                    CollisionPair pair = {c1, c2, contact};
+                    _collision_pairs.emplace_back(pair);
                 }
             } else if (c1.type == uint8_t(ColliderType::LINE) &&
                        c2.type == uint8_t(ColliderType::CIRCLE)) {
-                auto &c1_data = getColliderData<LineCollider2dImpl::Data>(c1);
-                auto &c2_data = getColliderData<CircleCollider2dImpl::Data>(c2);
-                std::optional<contact_2d_t> contact =
-                    circleToLineSegment(c2_data.circle, c1_data.line);
-                if (contact.has_value()) {
+                const auto &c1_data = getColliderData<LineCollider2dImpl::Data>(c1);
+                const auto &c2_data = getColliderData<CircleCollider2dImpl::Data>(c2);
+                if (circleToLineSegment(c2_data.circle, c1_data.line, contact)) {
 
-                    CollisionPair pair = {c1, c2, contact.value()};
+                    CollisionPair pair = {c1, c2, contact};
                     // flip normal so it points out of the circle
                     pair.contact.normal = -pair.contact.normal;
 
-                    assert(pair.a.type == uint8_t(ColliderType::LINE));
-                    assert(pair.b.type == uint8_t(ColliderType::CIRCLE));
-
-                    _collision_pairs.push_back(pair);
+                    _collision_pairs.emplace_back(pair);
                 }
             }
         }

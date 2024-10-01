@@ -37,7 +37,7 @@ void PhysicsSystem2dImpl::update(float dt) {
 
     // sum all global forces
     glm::vec2 global_force_sum(0);
-    for (auto &f : _global_forces) {
+    for (const glm::vec2 &f : _global_forces) {
         global_force_sum += f;
     }
     for (int i = 0; i < _iterations; i++) {

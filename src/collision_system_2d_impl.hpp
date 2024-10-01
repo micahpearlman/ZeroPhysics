@@ -35,9 +35,21 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
 
     template <typename T> T &getColliderData(const collider_handle_2d_t &hndl) {
         if constexpr (std::is_same_v<T, CircleCollider2dImpl::Data>) {
-            return *_circle_collider_pool.idxToPtr(hndl.index);
+            return _circle_collider_pool[hndl.index];
         } else if constexpr (std::is_same_v<T, LineCollider2dImpl::Data>) {
-            return *_line_collider_pool.idxToPtr(hndl.index);
+            return _line_collider_pool[hndl.index];
+        } else {
+            static_assert(std::is_same_v<T, CircleCollider2dImpl::Data> ||
+                              std::is_same_v<T, LineCollider2dImpl::Data>,
+                          "Invalid collider type");
+        }
+    }
+
+    template <typename T> const T &getColliderData(const collider_handle_2d_t &hndl) const {
+        if constexpr (std::is_same_v<T, CircleCollider2dImpl::Data>) {
+            return _circle_collider_pool[hndl.index];
+        } else if constexpr (std::is_same_v<T, LineCollider2dImpl::Data>) {
+            return _line_collider_pool[hndl.index];
         } else {
             static_assert(std::is_same_v<T, CircleCollider2dImpl::Data> ||
                               std::is_same_v<T, LineCollider2dImpl::Data>,

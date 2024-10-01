@@ -163,6 +163,9 @@ template <typename T> class MemoryPool {
      * @return T* A pointer to the object.
      */
     T *idxToPtr(size_t idx) { return &_pool[idx].object; }
+    const T *idxToPtr(size_t idx) const { return &_pool[idx].object; }
+    T &operator[](size_t idx) { return _pool[idx].object; }
+    const T &operator[](size_t idx) const { return _pool[idx].object; }
 
   private:
 
@@ -264,10 +267,14 @@ template <typename T> class ComponentStore {
     }
 
     // Iterator support
-    auto begin() { return _components.begin(); }
-    auto end() { return _components.end(); }
-    auto begin() const { return _components.begin(); }
-    auto end() const { return _components.end(); }
+    std::vector<T>::iterator begin() { return _components.begin(); }
+    std::vector<T>::iterator end() { return _components.end(); }
+    std::vector<T>::iterator begin() const { return _components.begin(); }
+    std::vector<T>::iterator end() const { return _components.end(); }
+
+    size_t size() const { return size_t(_next_handle); }
+    T& at(int idx) { return _components[idx]; }
+    const T& at(int idx) const { return _components[idx]; } 
 
   private:
     std::vector<T>                         _components;
