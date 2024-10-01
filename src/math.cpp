@@ -38,19 +38,43 @@ circleToLineSegment(const circle_2d_t &s, const line_segment_2d_t &ls) {
 
     // if the distance is less than equal to the radius of the circle then we have a
     // collision.  NOTE: using squared distance to avoid sqrt until we need it
-    if (squared_distance <= s.radius * s.radius) {
-        // calculate the normal
-        glm::vec2 normal = glm::normalize(diff);
-
-        // calculate the penetration
-        float penetration = s.radius - glm::sqrt(squared_distance);
-
-        // calculate the contact point
-        glm::vec2 contact_point = s.center - (normal * s.radius);
-
-        return contact_2d_t{normal, contact_point, penetration};
+    if (squared_distance > s.radius * s.radius) {
+        return std::nullopt;
     }
-    return std::nullopt;
+    
+    // calculate the normal
+    glm::vec2 normal = glm::normalize(diff);
+
+    // calculate the penetration
+    float penetration = s.radius - glm::sqrt(squared_distance);
+
+    // calculate the contact point
+    glm::vec2 contact_point = s.center - (normal * s.radius);
+
+    return contact_2d_t{normal, contact_point, penetration};
 }
 
+std::optional<contact_2d_t>
+circleToCircle(const circle_2d_t& c1, const circle_2d_t& c2) {
+    // calculate squared distance between the two circle centers
+    glm::vec2 diff = c1.center - c2.center;
+    const float squared_distance = glm::dot(diff, diff);
+
+    // if squared distance is less than or equal to the sum of the radii squared then we have a collision
+    const float radius_sum = c1.radius + c2.radius;
+    const float radius_squared = radius_sum * radius_sum;
+    if (squared_distance > radius_squared) {
+        return std::nullopt;
+    }
+    // calculate the normal
+    glm::vec2 normal = glm::normalize(diff);
+
+    // calculate the penetration
+    const float penetration = radius_sum - glm::sqrt(squared_distance);
+
+    // calculate the contact point which is the collision normal times the radius of c1
+    const glm::vec2 contact_point = c1.center + (normal * c1.radius);
+
+    return contact_2d_t{normal, contact_point, penetration};
+}
 } // namespace zo

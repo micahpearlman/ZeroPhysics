@@ -143,31 +143,25 @@ void PhysicsSystem2dImpl::update(float dt) {
             PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_a.value());
 
-            // move apart by collision normal and penetration depth based on
-            // mass
-            // data.position += pair.contact.normal * (pair.contact.penetration *
-            //                                         (data.mass / total_mass));
+            // move apart by collision normal and penetration depth
             data.position += pair.contact.normal * pair.contact.penetration;
 
-            // adjust previous position based on impulse
-            // data.prev_position -= impulse_vector * (data.mass / total_mass);
+            // adjust previous position based on impulse and mass
             data.prev_position = data.position + (impulse_vector * (data.mass / total_mass));
+
+            // data.prev_position = data.position;  // DEBUG
         }
 
         if (phy_obj_b.has_value()) {
             PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_b.value());
 
-            // move apart by collision normal and penetration depth based on
-            // mass
-            // data.position += pair.contact.normal * (pair.contact.penetration *
-            //                                         (data.mass / total_mass));
-            data.position += pair.contact.normal * pair.contact.penetration;
+            // move apart by collision normal and penetration depth (opposite direction)
+            data.position += pair.contact.normal * -pair.contact.penetration;
 
-
-            // adjust previous position based on impulse
-            //data.prev_position -= impulse_vector * (data.mass / total_mass);
-            data.prev_position = data.position + (impulse_vector * (data.mass / total_mass));
+            // adjust previous position based on impulse and mass (opposite direction)
+            data.prev_position = data.position - (impulse_vector * (data.mass / total_mass));
+            // data.prev_position = data.position; // DEBUG
         }
 
     }

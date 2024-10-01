@@ -114,11 +114,13 @@ void CollisionSystem2dImpl::generateCollisionPairs() {
                 c2.type == uint8_t(ColliderType::CIRCLE)) {
                 auto &c1_data = getColliderData<CircleCollider2dImpl::Data>(c1);
                 auto &c2_data = getColliderData<CircleCollider2dImpl::Data>(c2);
-                // do circle to circle collision
-                // if (circleToCircle(c1_data, c2_data)) {
-                //     CollisionPair pair = {c1, c2};
-                //     _collision_pairs.push_back(pair);
-                // }
+                std::optional<contact_2d_t> contact =
+                    circleToCircle(c1_data.circle, c2_data.circle);
+                if (contact.has_value()) {
+                    CollisionPair pair = {c1, c2, contact.value()};
+                    _collision_pairs.push_back(pair);
+                }
+
             } else if (c1.type == uint8_t(ColliderType::LINE) &&
                        c2.type == uint8_t(ColliderType::LINE)) {
                 auto &c1_data = getColliderData<LineCollider2dImpl::Data>(c1);
@@ -136,6 +138,8 @@ void CollisionSystem2dImpl::generateCollisionPairs() {
                     circleToLineSegment(c1_data.circle, c2_data.line);
                 if (contact.has_value()) {
                     CollisionPair pair = {c1, c2, contact.value()};
+                    // flip normal so it points out of the circle
+                    // pair.contact.normal = -pair.contact.normal;
                     _collision_pairs.push_back(pair);
                 }
             } else if (c1.type == uint8_t(ColliderType::LINE) &&

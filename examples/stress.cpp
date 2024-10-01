@@ -118,11 +118,6 @@ int main(int argc, char **argv) {
     VGfloat fill_color[4] = {0.0f, 1.0f, 0.0f, 1.0f};
     vgSetParameterfv(fill_paint, VG_PAINT_COLOR, 4, &fill_color[0]);
 
-    VGPaint fill_paint_2 = vgCreatePaint();
-    vgSetPaint(fill_paint_2, VG_FILL_PATH);
-    VGfloat fill_color_2[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-    vgSetParameterfv(fill_paint_2, VG_PAINT_COLOR, 4, &fill_color_2[0]);
-
     VGPaint stroke_paint = vgCreatePaint();
     vgSetPaint(stroke_paint, VG_STROKE_PATH);
     VGfloat stroke_color[4] = {0.0f, 0.0f, 1.0f, 1.0f};
@@ -150,40 +145,25 @@ int main(int argc, char **argv) {
         zo::PhysicsSystem2d::create(1024, 1);
 
     // create a physics object
-    std::unique_ptr<zo::PhysicsObject2d> ball_phy_obj_1 =
+    std::unique_ptr<zo::PhysicsObject2d> ball_phy_obj =
         physics_system->createPhysicsObject();
-    ball_phy_obj_1->setPosition({300, 300});
-    ball_phy_obj_1->setVelocity({150, 0});
-
-    std::unique_ptr<zo::PhysicsObject2d> ball_phy_obj_2 =
-        physics_system->createPhysicsObject();
-    ball_phy_obj_2->setPosition({600, 300});
-    ball_phy_obj_2->setVelocity({-150, 0});
+    ball_phy_obj->setPosition({300, 100});
+    ball_phy_obj->setVelocity({500, 0});
 
     // create a circle collider
     zo::CollisionSystem2d &collision_system = physics_system->collisionSystem();
-
-    std::unique_ptr<zo::CircleCollider2d> circle_collider_1 =
+    std::unique_ptr<zo::CircleCollider2d> circle_collider =
         collision_system.createCollider<zo::CircleCollider2d>();
-    circle_collider_1->setRadius(15.0f);
-    ball_phy_obj_1->setCollider(*circle_collider_1, 0);
-
-    std::unique_ptr<zo::CircleCollider2d> circle_collider_2 =
-        collision_system.createCollider<zo::CircleCollider2d>();
-    circle_collider_2->setRadius(15.0f);
-    ball_phy_obj_2->setCollider(*circle_collider_2, 0);
+    circle_collider->setRadius(15.0f);
+    ball_phy_obj->setCollider(*circle_collider, 0);
 
     // add some gravity
     physics_system->addGlobalForce({0, 120.0f});
 
     // create a small vg circle to represent the physics object
-    VGPath circle_1 = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
+    VGPath circle = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
                                  0, 0, 0, VG_PATH_CAPABILITY_ALL);
-    vguEllipse(circle_1, 0.0f, 0.0f, 30.0f, 30.0f);
-
-    VGPath circle_2 = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
-                                 0, 0, 0, VG_PATH_CAPABILITY_ALL);
-    vguEllipse(circle_2, 0.0f, 0.0f, 30.0f, 30.0f);
+    vguEllipse(circle, 0.0f, 0.0f, 30.0f, 30.0f);
 
     /// walls and floor segments
     std::array<glm::vec2, 4> segments = {{
@@ -221,13 +201,9 @@ int main(int argc, char **argv) {
 
 
     // velocity vector display
-    VGPath velocity_vector_1 = vgCreatePath(VG_PATH_FORMAT_STANDARD,
+    VGPath velocity_vector = vgCreatePath(VG_PATH_FORMAT_STANDARD,
                                           VG_PATH_DATATYPE_F, 1, 0, 0, 0,
                                           VG_PATH_CAPABILITY_ALL);
-    VGPath velocity_vector_2 = vgCreatePath(VG_PATH_FORMAT_STANDARD,
-                                          VG_PATH_DATATYPE_F, 1, 0, 0, 0,
-                                          VG_PATH_CAPABILITY_ALL);
-
     VGPaint velocity_paint = vgCreatePaint();
     VGfloat velocity_color[4] = {1.0f, 0.0f, 0.0f, 1.0f};
     vgSetParameterfv(velocity_paint, VG_PAINT_COLOR, 4, &velocity_color[0]);
@@ -262,50 +238,27 @@ int main(int argc, char **argv) {
         vgSetPaint(stroke_paint, VG_STROKE_PATH);
         vgDrawPath(box_path, VG_STROKE_PATH);
 
-        // draw first ball
+        // draw object
         vgLoadIdentity();
-        glm::vec2 pos = ball_phy_obj_1->position();
+        glm::vec2 pos = ball_phy_obj->position();
         vgTranslate(pos.x, pos.y);
         // fill and stroke paints
         vgSetPaint(fill_paint, VG_FILL_PATH);
         vgSetPaint(stroke_paint, VG_STROKE_PATH);
 
-        // draw the ball path with fill and stroke
-        vgDrawPath(circle_1, VG_FILL_PATH | VG_STROKE_PATH);
-
-        // draw velocity vector for the balls
-        glm::vec2 vel = ball_phy_obj_1->velocity() * -20.0f;
-        vgSetf(VG_STROKE_LINE_WIDTH, 2.0f);
-        vgSetPaint(velocity_paint, VG_STROKE_PATH);
-        vgLoadIdentity();
-        vgTranslate(pos.x, pos.y);
-        vgClearPath(velocity_vector_1, VG_PATH_CAPABILITY_ALL);
-        vgAppendPathData(velocity_vector_1, 2, (VGubyte[]){VG_MOVE_TO_ABS, VG_LINE_TO_ABS},
-                         (VGfloat[]){0, 0, vel.x, vel.y});
-        vgDrawPath(velocity_vector_1, VG_STROKE_PATH);
-
-
-        /// draw ball 2
-        vgLoadIdentity();
-        pos = ball_phy_obj_2->position();
-        vgTranslate(pos.x, pos.y);
-        // fill and stroke paints
-        vgSetPaint(fill_paint_2, VG_FILL_PATH);
-        vgSetPaint(stroke_paint, VG_STROKE_PATH);
-
         // draw the path with fill and stroke
-        vgDrawPath(circle_2, VG_FILL_PATH | VG_STROKE_PATH);
+        vgDrawPath(circle, VG_FILL_PATH | VG_STROKE_PATH);
 
-
-        vel = ball_phy_obj_2->velocity() * -20.0f;
+        // draw velocity vector for the ball
+        glm::vec2 vel = ball_phy_obj->velocity() * -20.0f;
         vgSetf(VG_STROKE_LINE_WIDTH, 2.0f);
         vgSetPaint(velocity_paint, VG_STROKE_PATH);
         vgLoadIdentity();
         vgTranslate(pos.x, pos.y);
-        vgClearPath(velocity_vector_2, VG_PATH_CAPABILITY_ALL);
-        vgAppendPathData(velocity_vector_2, 2, (VGubyte[]){VG_MOVE_TO_ABS, VG_LINE_TO_ABS},
+        vgClearPath(velocity_vector, VG_PATH_CAPABILITY_ALL);
+        vgAppendPathData(velocity_vector, 2, (VGubyte[]){VG_MOVE_TO_ABS, VG_LINE_TO_ABS},
                          (VGfloat[]){0, 0, vel.x, vel.y});
-        vgDrawPath(velocity_vector_2, VG_STROKE_PATH);
+        vgDrawPath(velocity_vector, VG_STROKE_PATH);
 
 
         // pop the ortho camera
@@ -337,8 +290,8 @@ int main(int argc, char **argv) {
 
         // reset ball on space bar
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            ball_phy_obj_1->setPosition({300, 100});
-            ball_phy_obj_1->setVelocity({500, 0});
+            ball_phy_obj->setPosition({300, 100});
+            ball_phy_obj->setVelocity({500, 0});
         }
 
     } // Check if the ESC key was pressed or the window was closed

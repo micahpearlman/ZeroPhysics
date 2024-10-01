@@ -47,4 +47,21 @@ TEST(MathTest, CircleToLineSegmentCollision) {
     EXPECT_EQ(contact->point, glm::vec2(5.0f, 0.0f));
     EXPECT_NEAR(contact->penetration, 0.0f, 1e-5);
 }
+
+TEST(MathTest, CircleToCircle) {
+    circle_2d_t c1{glm::vec2(0.0f, 0.0f), 5.0f};
+    circle_2d_t c2{glm::vec2(7.0f, 0.0f), 5.0f};
+
+    auto contact = circleToCircle(c1, c2);
+    ASSERT_TRUE(contact.has_value());
+
+    EXPECT_EQ(contact->normal, glm::vec2(1.0f, 0.0f));
+    EXPECT_EQ(contact->point, glm::vec2(5.0f, 0.0f));
+    EXPECT_NEAR(contact->penetration, 3.0f, 1e-5);
+
+    c2 = circle_2d_t{glm::vec2(11.0f, 0.0f), 5.0f};
+    contact = circleToCircle(c1, c2);
+    EXPECT_FALSE(contact.has_value());
+
+}
  

@@ -26,6 +26,11 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build
 
 ## Examples
 
+### Hello World
+
+<img src="./hello-world.gif" width=480>
+
+
 Hello world is a simple example that creates a single "ball" and container box.  The ball is dropped into the container and bounces around.
 
 To run the example:

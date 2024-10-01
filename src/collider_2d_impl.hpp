@@ -25,7 +25,7 @@ class Collider2dImpl : virtual public Collider2d {
         uint8_t  type = uint8_t(ColliderType::MAX);
         bool     is_sensor = false;
         float    friction = 0.0f;
-        float    restitution = 0.8f;
+        float    restitution = 0.83;
         uint16_t category_bits = 0;
         uint16_t mask_bits = 0;
     };
