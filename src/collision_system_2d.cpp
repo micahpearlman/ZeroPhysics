@@ -14,9 +14,7 @@
 namespace zo {
 
 CollisionSystem2dImpl::CollisionSystem2dImpl(size_t max_colliders)
-    : _circle_collider_pool(max_colliders),
-      _collision_pair_pool(max_colliders * 2),
-      _collision_pairs(_collision_pair_pool) {
+    : _circle_collider_pool(max_colliders) {
 
     // make sure the max colliders cannot be greater then 28 bits
     if (max_colliders > (1 << 28)) {
@@ -80,8 +78,8 @@ CollisionSystem2dImpl::createCollider(ColliderType type) {
     return std::nullopt;
 }
 
-Collider2dImpl::Data &CollisionSystem2dImpl::getBaseColliderData(
-    collider_handle_2d_t hndl) {
+Collider2dImpl::Data &
+CollisionSystem2dImpl::getBaseColliderData(const collider_handle_2d_t& hndl) {
     switch (hndl.type) {
     case uint8_t(ColliderType::CIRCLE): {
         return getColliderData<CircleCollider2dImpl::Data>(hndl);
@@ -100,7 +98,8 @@ void CollisionSystem2dImpl::generateCollisionPairs() {
     _collision_pairs.clear();
 
     // generate collision pairs
-    // O(n^2) collision detection. TODO: implement broadphase collision detection
+    // O(n^2) collision detection. TODO: implement broadphase collision
+    // detection
     for (auto iter1 = _colliders.begin(); iter1 != _colliders.end(); ++iter1) {
         const ColliderHandle &c1 = *iter1;
         for (auto iter2 = iter1 + 1; iter2 != _colliders.end(); iter2++) {
@@ -132,14 +131,14 @@ void CollisionSystem2dImpl::generateCollisionPairs() {
                 // }
             } else if (c1.type == uint8_t(ColliderType::CIRCLE) &&
                        c2.type == uint8_t(ColliderType::LINE)) {
-                auto &c1_data = getColliderData<CircleCollider2dImpl::Data>(c1);
+                auto &c1_data = getColliderData<CircleCollider2dImpl::Data>(c1);                
                 auto &c2_data = getColliderData<LineCollider2dImpl::Data>(c2);
                 std::optional<contact_2d_t> contact =
                     circleToLineSegment(c1_data.circle, c2_data.line);
                 if (contact.has_value()) {
                     CollisionPair pair = {c1, c2, contact.value()};
-                    // flip normal so it points out of the circle
-                    // pair.contact.normal = -pair.contact.normal;
+                    assert(pair.a.type == uint8_t(ColliderType::CIRCLE));
+                    assert(pair.b.type == uint8_t(ColliderType::LINE));
                     _collision_pairs.push_back(pair);
                 }
             } else if (c1.type == uint8_t(ColliderType::LINE) &&
@@ -149,7 +148,14 @@ void CollisionSystem2dImpl::generateCollisionPairs() {
                 std::optional<contact_2d_t> contact =
                     circleToLineSegment(c2_data.circle, c1_data.line);
                 if (contact.has_value()) {
+
                     CollisionPair pair = {c1, c2, contact.value()};
+                    // flip normal so it points out of the circle
+                    pair.contact.normal = -pair.contact.normal;
+
+                    assert(pair.a.type == uint8_t(ColliderType::LINE));
+                    assert(pair.b.type == uint8_t(ColliderType::CIRCLE));
+
                     _collision_pairs.push_back(pair);
                 }
             }

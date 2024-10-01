@@ -98,14 +98,18 @@ void PhysicsSystem2dImpl::update(float dt) {
         if (phy_obj_a.has_value()) {
             const PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_a.value());
-            total_mass += data.mass;
-            velocity_a = data.prev_position - data.position;
+            if (data.mass > 0) {
+                total_mass += data.mass;
+                velocity_a = data.prev_position - data.position;
+            }
         }
         if (phy_obj_b.has_value()) {
             const PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_b.value());
-            total_mass += data.mass;
-            velocity_b = data.prev_position - data.position;
+            if (data.mass > 0) {
+                total_mass += data.mass;
+                velocity_b = data.prev_position - data.position;
+            }
         }
 
         // if both objects are static then skip
@@ -119,7 +123,8 @@ void PhysicsSystem2dImpl::update(float dt) {
             _collision_system->getBaseColliderData(pair.b);
 
         // calculate the relative velocities along the collision normal
-        float rel_velo_along_norm = glm::dot(velocity_a - velocity_b, pair.contact.normal);
+        float rel_velo_along_norm =
+            glm::dot(velocity_a - velocity_b, pair.contact.normal);
 
         // if not already separating then resolve the collision by moving apart
         // with an impulse.
@@ -130,40 +135,44 @@ void PhysicsSystem2dImpl::update(float dt) {
             float restitution =
                 0.5f * (col_data_a.restitution + col_data_b.restitution);
 
-
             // calculate impulse vector
             glm::vec2 rel_velo = velocity_a - velocity_b;
             impulse_vector = glm::reflect(rel_velo, pair.contact.normal);
             impulse_vector *= restitution;
-
         }
 
         // move apart
         if (phy_obj_a.has_value()) {
             PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_a.value());
+            if (data.mass > 0) {
+                // move apart by collision normal and penetration depth
+                data.position += pair.contact.normal * pair.contact.penetration;
 
-            // move apart by collision normal and penetration depth
-            data.position += pair.contact.normal * pair.contact.penetration;
+                // adjust previous position based on impulse and mass
+                data.prev_position =
+                    data.position + (impulse_vector * (data.mass / total_mass));
 
-            // adjust previous position based on impulse and mass
-            data.prev_position = data.position + (impulse_vector * (data.mass / total_mass));
-
-            // data.prev_position = data.position;  // DEBUG
+                // data.prev_position = data.position;  // DEBUG
+            }
         }
 
         if (phy_obj_b.has_value()) {
             PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_b.value());
 
-            // move apart by collision normal and penetration depth (opposite direction)
-            data.position += pair.contact.normal * -pair.contact.penetration;
+            if (data.mass > 0) {
+                // move apart by collision normal and penetration depth (opposite
+                // direction)
+                data.position += pair.contact.normal * -pair.contact.penetration;
 
-            // adjust previous position based on impulse and mass (opposite direction)
-            data.prev_position = data.position - (impulse_vector * (data.mass / total_mass));
-            // data.prev_position = data.position; // DEBUG
+                // adjust previous position based on impulse and mass (opposite
+                // direction)
+                data.prev_position =
+                    data.position - (impulse_vector * (data.mass / total_mass));
+                // data.prev_position = data.position; // DEBUG
+            }
         }
-
     }
 }
 

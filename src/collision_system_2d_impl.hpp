@@ -29,11 +29,11 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
     void destroyCollider(std::unique_ptr<Collider2d> collider) override;
 
     /// @brief create a collider of a specific type
-    /// @param type 
-    /// @return 
+    /// @param type
+    /// @return
     std::optional<collider_handle_2d_t> createCollider(ColliderType type);
 
-    template <typename T> T &getColliderData(collider_handle_2d_t hndl) {
+    template <typename T> T &getColliderData(const collider_handle_2d_t &hndl) {
         if constexpr (std::is_same_v<T, CircleCollider2dImpl::Data>) {
             return *_circle_collider_pool.idxToPtr(hndl.index);
         } else if constexpr (std::is_same_v<T, LineCollider2dImpl::Data>) {
@@ -45,22 +45,22 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
         }
     }
 
-    Collider2dImpl::Data& getBaseColliderData(collider_handle_2d_t hndl);
+    Collider2dImpl::Data &getBaseColliderData(const collider_handle_2d_t &hndl);
 
     void generateCollisionPairs() override;
 
     /// @brief Get the collision pairs
-    /// @return 
-    std::vector<CollisionPair, MemoryPool<CollisionPair>> &collisionPairs() { return _collision_pairs; }
-
+    /// @return
+    std::vector<CollisionPair> &collisionPairs() {
+        return _collision_pairs;
+    }
 
   private:
     MemoryPool<CircleCollider2dImpl::Data> _circle_collider_pool;
     MemoryPool<LineCollider2dImpl::Data>   _line_collider_pool;
     ComponentStore<ColliderHandle>         _colliders;
 
-    MemoryPool<CollisionPair> _collision_pair_pool;
-    std::vector<CollisionPair, MemoryPool<CollisionPair>> _collision_pairs;
+    std::vector<CollisionPair> _collision_pairs;
 };
 
 } // namespace zo

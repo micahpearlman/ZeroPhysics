@@ -37,44 +37,6 @@
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
 
-class GameObject {
-  private:
-    VGPath  _path;
-    VGPaint _fill_paint;
-    VGPaint _stroke_paint;
-
-    std::unique_ptr<zo::PhysicsObject2d> _phy_obj;
-    std::shared_ptr<zo::PhysicsSystem2d> _physics_system;
-
-  public:
-    GameObject(VGPath path, VGPaint fill_paint, VGPaint stroke_paint,
-               std::shared_ptr<zo::PhysicsSystem2d> physics_system,
-               glm::vec2 position, glm::vec2 velocity)
-        : _path(path), _fill_paint(fill_paint), _stroke_paint(stroke_paint) {}
-
-    void draw() {
-        // set up path trasnform
-        vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
-        vgLoadIdentity();
-        glm::vec2 pos = _phy_obj->position();
-        vgTranslate(pos.x, pos.y);
-        // fill and stroke paints
-        vgSetPaint(_fill_paint, VG_FILL_PATH);
-        vgSetPaint(_stroke_paint, VG_STROKE_PATH);
-
-        // draw the path with fill and stroke
-        vgDrawPath(_path, VG_FILL_PATH | VG_STROKE_PATH);
-    }
-
-    ~GameObject() {
-        vgDestroyPath(_path);
-        vgDestroyPaint(_fill_paint);
-        vgDestroyPaint(_stroke_paint);
-    }
-
-    // get physics object
-    zo::PhysicsObject2d *physicsObject() { return _phy_obj.get(); }
-};
 
 int main(int argc, char **argv) {
     std::cout << "Hello, MonkVG!\n";
@@ -128,14 +90,6 @@ int main(int argc, char **argv) {
     VGfloat stroke_color[4] = {0.0f, 0.0f, 1.0f, 1.0f};
     vgSetParameterfv(stroke_paint, VG_PAINT_COLOR, 4, &stroke_color[0]);
 
-    // create a simple box path
-    VGPath path;
-    path = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1, 0, 0, 0,
-                        VG_PATH_CAPABILITY_ALL);
-    vguRect(path, 0.0f, 0.0f, 100.0f, 150.0f);
-
-    // load and create an opencv image
-    int img_width, img_height, img_channels;
 
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
@@ -346,7 +300,6 @@ int main(int argc, char **argv) {
            glfwWindowShouldClose(window) == 0);
 
     // destroy MonkVG
-    vgDestroyPath(path);
     vgDestroyPaint(fill_paint);
     vgDestroyContextMNK();
 

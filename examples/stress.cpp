@@ -44,20 +44,43 @@ class GameObject {
     VGPaint _stroke_paint;
 
     std::unique_ptr<zo::PhysicsObject2d> _phy_obj;
-    std::shared_ptr<zo::PhysicsSystem2d> _physics_system;
+    std::shared_ptr<zo::PhysicsSystem2d> _phy_sys;
 
   public:
-    GameObject(VGPath path, VGPaint fill_paint, VGPaint stroke_paint,
-               std::shared_ptr<zo::PhysicsSystem2d> physics_system,
-               glm::vec2 position, glm::vec2 velocity)
-        : _path(path), _fill_paint(fill_paint), _stroke_paint(stroke_paint) {}
+    GameObject(std::shared_ptr<zo::PhysicsSystem2d> physics_system)
+        : _phy_sys(physics_system) {
+        // create a physics object
+        _phy_obj = _phy_sys->createPhysicsObject();
+
+        // create path
+        _path = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1, 0,
+                             0, 0, VG_PATH_CAPABILITY_ALL);
+        // create fill paint
+        _fill_paint = vgCreatePaint();
+
+        // create stroke paint
+        _stroke_paint = vgCreatePaint();
+    }
+
+    zo::PhysicsObject2d &physicsObject() { return *_phy_obj; }
+
+    VGPath &path() { return _path; }
+
+    VGPaint &fillPaint() { return _fill_paint; }
+
+    VGPaint &strokePaint() { return _stroke_paint; }
 
     void draw() {
+
         // set up path trasnform
         vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
         vgLoadIdentity();
         glm::vec2 pos = _phy_obj->position();
         vgTranslate(pos.x, pos.y);
+
+        // set stroke width
+        vgSetf(VG_STROKE_LINE_WIDTH, 5.0f);
+
         // fill and stroke paints
         vgSetPaint(_fill_paint, VG_FILL_PATH);
         vgSetPaint(_stroke_paint, VG_STROKE_PATH);
@@ -70,14 +93,91 @@ class GameObject {
         vgDestroyPath(_path);
         vgDestroyPaint(_fill_paint);
         vgDestroyPaint(_stroke_paint);
+        _phy_obj.reset();
     }
+};
 
-    // get physics object
-    zo::PhysicsObject2d *physicsObject() { return _phy_obj.get(); }
+class Ball : public GameObject {
+  public:
+    Ball(std::shared_ptr<zo::PhysicsSystem2d> physics_system, float radius)
+        : GameObject(physics_system) {
+
+        // create a circle collider
+        zo::CollisionSystem2d &collision_system =
+            physics_system->collisionSystem();
+        std::unique_ptr<zo::CircleCollider2d> circle_collider =
+            collision_system.createCollider<zo::CircleCollider2d>();
+        circle_collider->setRadius(radius);
+        physicsObject().setCollider(*circle_collider, 0);
+
+        // create a circle path
+        vguEllipse(path(), 0.0f, 0.0f, radius, radius);
+
+        // generate random fill color
+        VGfloat fill_color[4] = {(float)rand() / (float)RAND_MAX,
+                                 (float)rand() / (float)RAND_MAX,
+                                 (float)rand() / (float)RAND_MAX, 1.0f};
+        vgSetParameterfv(fillPaint(), VG_PAINT_COLOR, 4, &fill_color[0]);
+
+        // generate random stroke color
+        VGfloat stroke_color[4] = {(float)rand() / (float)RAND_MAX,
+                                   (float)rand() / (float)RAND_MAX,
+                                   (float)rand() / (float)RAND_MAX, 1.0f};
+        vgSetParameterfv(strokePaint(), VG_PAINT_COLOR, 4, &stroke_color[0]);
+    }
+};
+
+class StaticBox : public GameObject {
+  private:
+    std::vector<std::unique_ptr<zo::LineCollider2d>> _line_colliders;
+
+  public:
+    StaticBox(std::shared_ptr<zo::PhysicsSystem2d> physics_system, float width,
+              float height)
+        : GameObject(physics_system) {
+
+        // physicsObject().setPosition({width/2, height/2});
+        physicsObject().setMass(0); // static object
+
+        glm::vec2                offset = {width / 2, height / 2};
+        std::array<glm::vec2, 4> vertices = {
+            {glm::vec2(-width / 2, -height / 2) + offset,
+             glm::vec2(width / 2, -height / 2) + offset,
+             glm::vec2(width / 2, height / 2) + offset,
+             glm::vec2(-width / 2, height / 2) + offset}};
+
+        // create a series of line segment colliders from vertices
+        zo::CollisionSystem2d &collision_system =
+            physics_system->collisionSystem();
+        for (int i = 0; i < 4; i++) {
+            std::unique_ptr<zo::LineCollider2d> line_collider =
+                collision_system.createCollider<zo::LineCollider2d>();
+            zo::line_segment_2d_t line_segment = {vertices[i],
+                                                  vertices[(i + 1) % 4]};
+            line_collider->setLine(line_segment);
+            _line_colliders.push_back(std::move(line_collider));
+        }
+        // create a box path from the vertices
+        vguPolygon(path(), (VGfloat *)&vertices, vertices.size(), VG_TRUE);
+
+        // generate random fill color
+        VGfloat fill_color[4] = {(float)rand() / (float)RAND_MAX,
+                                 (float)rand() / (float)RAND_MAX,
+                                 (float)rand() / (float)RAND_MAX, 0.01f};
+        vgSetParameterfv(fillPaint(), VG_PAINT_COLOR, 4, &fill_color[0]);
+
+        // generate random stroke color
+        VGfloat stroke_color[4] = {(float)rand() / (float)RAND_MAX,
+                                   (float)rand() / (float)RAND_MAX,
+                                   (float)rand() / (float)RAND_MAX, 1.0f};
+        vgSetParameterfv(strokePaint(), VG_PAINT_COLOR, 4, &stroke_color[0]);
+    }
 };
 
 int main(int argc, char **argv) {
+
     std::cout << "Hello, MonkVG!\n";
+
     // Initialise GLFW
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW\n";
@@ -112,26 +212,6 @@ int main(int argc, char **argv) {
     vgCreateContextMNK(WINDOW_WIDTH, WINDOW_HEIGHT,
                        VG_RENDERING_BACKEND_TYPE_OPENGL33);
 
-    // create fill and stroke paints
-    VGPaint fill_paint = vgCreatePaint();
-    vgSetPaint(fill_paint, VG_FILL_PATH);
-    VGfloat fill_color[4] = {0.0f, 1.0f, 0.0f, 1.0f};
-    vgSetParameterfv(fill_paint, VG_PAINT_COLOR, 4, &fill_color[0]);
-
-    VGPaint stroke_paint = vgCreatePaint();
-    vgSetPaint(stroke_paint, VG_STROKE_PATH);
-    VGfloat stroke_color[4] = {0.0f, 0.0f, 1.0f, 1.0f};
-    vgSetParameterfv(stroke_paint, VG_PAINT_COLOR, 4, &stroke_color[0]);
-
-    // create a simple box path
-    VGPath path;
-    path = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1, 0, 0, 0,
-                        VG_PATH_CAPABILITY_ALL);
-    vguRect(path, 0.0f, 0.0f, 100.0f, 150.0f);
-
-    // load and create an opencv image
-    int img_width, img_height, img_channels;
-
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
@@ -140,74 +220,51 @@ int main(int argc, char **argv) {
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
+    /// random seed
+    srand(time(NULL));
+
     /// initialize the physics system
+    constexpr int MAX_PHYSICS_OBJECTS = 1000 * 10;
+    ;
     std::shared_ptr<zo::PhysicsSystem2d> physics_system =
-        zo::PhysicsSystem2d::create(1024, 1);
+        zo::PhysicsSystem2d::create(MAX_PHYSICS_OBJECTS, 1);
 
-    // create a physics object
-    std::unique_ptr<zo::PhysicsObject2d> ball_phy_obj =
-        physics_system->createPhysicsObject();
-    ball_phy_obj->setPosition({300, 100});
-    ball_phy_obj->setVelocity({500, 0});
+    std::vector<std::unique_ptr<GameObject>> game_objects;
 
-    // create a circle collider
-    zo::CollisionSystem2d &collision_system = physics_system->collisionSystem();
-    std::unique_ptr<zo::CircleCollider2d> circle_collider =
-        collision_system.createCollider<zo::CircleCollider2d>();
-    circle_collider->setRadius(15.0f);
-    ball_phy_obj->setCollider(*circle_collider, 0);
+    // create a static box
+    std::unique_ptr<StaticBox> box =
+        std::make_unique<StaticBox>(physics_system, width, 500);
 
-    // add some gravity
+    game_objects.push_back(std::move(box));
+
+    // create a row of balls with random velocities
+    const float BALL_RADIUS = 5.0f;
+    const float X_OFFSET = BALL_RADIUS + 1.0f;
+    const float Y_POS = 30;
+    glm::vec2   pos = {X_OFFSET, Y_POS};
+    const int   NUM_BALLS_ROW = width / ((BALL_RADIUS + 1.0f) * 2);
+    const int   NUM_ROWS = 10;
+    for (int r = 0; r < NUM_ROWS; r++) {
+        for (int i = 0; i < NUM_BALLS_ROW; i++) {
+            std::unique_ptr<Ball> ball =
+                std::make_unique<Ball>(physics_system, BALL_RADIUS);
+            pos += glm::vec2(X_OFFSET * 2, 0);
+            ball->physicsObject().setPosition(pos);
+            ball->physicsObject().setVelocity(
+                {(float)(rand() % 200) - 100, (float)(rand() % 200) - 100});
+            game_objects.push_back(std::move(ball));
+        }
+    }
+
+    // create a ball
+    // std::unique_ptr<Ball> ball =
+    // std::make_unique<Ball>(physics_system, 50.0f);
+    // ball->physicsObject().setPosition({300, 100});
+    // ball->physicsObject().setVelocity({50, 0});
+    // game_objects.push_back(std::move(ball));
+
+    // set gravity
     physics_system->addGlobalForce({0, 120.0f});
-
-    // create a small vg circle to represent the physics object
-    VGPath circle = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
-                                 0, 0, 0, VG_PATH_CAPABILITY_ALL);
-    vguEllipse(circle, 0.0f, 0.0f, 30.0f, 30.0f);
-
-    /// walls and floor segments
-    std::array<glm::vec2, 4> segments = {{
-        glm::vec2{200, 100},
-        glm::vec2{200, 500},
-        glm::vec2{800, 500},
-        glm::vec2{800, 100}
-    }};
-
-    // left wall collider
-    std::unique_ptr<zo::LineCollider2d> left_wall_col =
-        collision_system.createCollider<zo::LineCollider2d>();
-    zo::line_segment_2d_t left_wall_segment{segments[0], segments[1]};
-    left_wall_col->setLine(left_wall_segment);
-
-
-    // floor collider
-    std::unique_ptr<zo::LineCollider2d> floor_col =
-        collision_system.createCollider<zo::LineCollider2d>();
-
-    zo::line_segment_2d_t floor_segment = {segments[1], segments[2]};
-    floor_col->setLine(floor_segment);
-
-    // right wall collider
-    std::unique_ptr<zo::LineCollider2d> right_wall_col =
-        collision_system.createCollider<zo::LineCollider2d>();
-    zo::line_segment_2d_t right_wall_segment = {segments[2], segments[3]};
-    right_wall_col->setLine(right_wall_segment);
-
-
-    // create a floor path
-    VGPath box_path = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F,
-                                   1, 0, 0, 0, VG_PATH_CAPABILITY_ALL);
-    vguPolygon(box_path, (VGfloat *)&segments, segments.size(), VG_FALSE);
-
-
-    // velocity vector display
-    VGPath velocity_vector = vgCreatePath(VG_PATH_FORMAT_STANDARD,
-                                          VG_PATH_DATATYPE_F, 1, 0, 0, 0,
-                                          VG_PATH_CAPABILITY_ALL);
-    VGPaint velocity_paint = vgCreatePaint();
-    VGfloat velocity_color[4] = {1.0f, 0.0f, 0.0f, 1.0f};
-    vgSetParameterfv(velocity_paint, VG_PAINT_COLOR, 4, &velocity_color[0]);
-
 
     float  last_time = glfwGetTime();
     double previous_seconds = glfwGetTime();
@@ -228,44 +285,15 @@ int main(int argc, char **argv) {
         physics_system->update(delta_time);
         last_time = glfwGetTime();
 
-        /// draw the basic path
-        vgLoadIdentity();
-
-        // draw the floor
-        vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
-        vgLoadIdentity();
-        vgSetf(VG_STROKE_LINE_WIDTH, 5.0f);
-        vgSetPaint(stroke_paint, VG_STROKE_PATH);
-        vgDrawPath(box_path, VG_STROKE_PATH);
-
-        // draw object
-        vgLoadIdentity();
-        glm::vec2 pos = ball_phy_obj->position();
-        vgTranslate(pos.x, pos.y);
-        // fill and stroke paints
-        vgSetPaint(fill_paint, VG_FILL_PATH);
-        vgSetPaint(stroke_paint, VG_STROKE_PATH);
-
-        // draw the path with fill and stroke
-        vgDrawPath(circle, VG_FILL_PATH | VG_STROKE_PATH);
-
-        // draw velocity vector for the ball
-        glm::vec2 vel = ball_phy_obj->velocity() * -20.0f;
-        vgSetf(VG_STROKE_LINE_WIDTH, 2.0f);
-        vgSetPaint(velocity_paint, VG_STROKE_PATH);
-        vgLoadIdentity();
-        vgTranslate(pos.x, pos.y);
-        vgClearPath(velocity_vector, VG_PATH_CAPABILITY_ALL);
-        vgAppendPathData(velocity_vector, 2, (VGubyte[]){VG_MOVE_TO_ABS, VG_LINE_TO_ABS},
-                         (VGfloat[]){0, 0, vel.x, vel.y});
-        vgDrawPath(velocity_vector, VG_STROKE_PATH);
-
+        // draw the game objects
+        for (auto &go : game_objects) {
+            go->draw();
+        }
 
         // pop the ortho camera
         vgPopOrthoCamera();
 
         // calculate the frame rate
-
         double current_seconds = glfwGetTime();
         double elapsed_seconds = current_seconds - previous_seconds;
         if (elapsed_seconds > 0.25) {
@@ -289,18 +317,18 @@ int main(int argc, char **argv) {
         glfwPollEvents();
 
         // reset ball on space bar
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            ball_phy_obj->setPosition({300, 100});
-            ball_phy_obj->setVelocity({500, 0});
-        }
+        // if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        //     // reset all objects
+
+        //     ball_phy_obj->setPosition({300, 100});
+        //     ball_phy_obj->setVelocity({500, 0});
+        // }
 
     } // Check if the ESC key was pressed or the window was closed
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0);
 
     // destroy MonkVG
-    vgDestroyPath(path);
-    vgDestroyPaint(fill_paint);
     vgDestroyContextMNK();
 
     glfwDestroyWindow(window);

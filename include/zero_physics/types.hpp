@@ -27,7 +27,7 @@ struct CollisionPair;
 using collider_pair_t = CollisionPair;
 
 // collider enum
-enum class ColliderType { CIRCLE = 0, LINE = 1, BOX = 2, MAX = 3 };
+enum class ColliderType { CIRCLE = 1, LINE = 2, BOX = 3, MAX = 4 };
 
 struct line_segment_2d_t {
     glm::vec2 start;
