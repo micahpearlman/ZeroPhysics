@@ -14,21 +14,22 @@
 
 namespace zo {
 
-std::shared_ptr<PhysicsSystem2d> PhysicsSystem2d::create(size_t max_num_objects,
-                                                         int    iterations) {
+std::shared_ptr<PhysicsSystem2d>
+PhysicsSystem2d::create(size_t max_num_objects, int iterations,
+                        BroadPhaseType broad_phase_type) {
     PhysicsSystem2dImpl *impl =
-        new PhysicsSystem2dImpl(max_num_objects, iterations);
+        new PhysicsSystem2dImpl(max_num_objects, iterations, broad_phase_type);
     return std::shared_ptr<PhysicsSystem2d>(impl);
 }
 
 PhysicsSystem2dImpl::PhysicsSystem2dImpl(size_t max_number_object,
-                                         float  iterations)
+                                         float  iterations, BroadPhaseType broad_phase_type)
     : _iterations(iterations) {
     // create the collision system
     // HARDWIRED: the collision system colliders is 3 times the number of
     // physics objects
     std::shared_ptr<CollisionSystem2d> collision_sys =
-        CollisionSystem2d::create(max_number_object * 3);
+        CollisionSystem2d::create(max_number_object * 3, broad_phase_type);
     _collision_system =
         std::static_pointer_cast<CollisionSystem2dImpl>(collision_sys);
 }
@@ -66,6 +67,14 @@ void PhysicsSystem2dImpl::update(float dt) {
                             ->getColliderData<CircleCollider2dImpl::Data>(
                                 data.collider);
                     collider.circle.center = data.position;
+
+                    // update the aabb
+                    collider.aabb.mn = collider.circle.center -
+                                       glm::vec2{collider.circle.radius,
+                                                 collider.circle.radius};
+                    collider.aabb.mx = collider.circle.center +
+                                        glm::vec2{collider.circle.radius,
+                                                     collider.circle.radius};
                 } else if (data.collider.type == uint8_t(ColliderType::LINE)) {
                     auto &collider =
                         _collision_system
@@ -76,6 +85,11 @@ void PhysicsSystem2dImpl::update(float dt) {
                     } else {
                         collider.line.end = data.position;
                     }
+
+                    // update the aabb
+                    collider.aabb.mn = glm::min(collider.line.start, collider.line.end);
+                    collider.aabb.mx = glm::max(collider.line.start, collider.line.end);
+                    
                 }
             }
         }
@@ -162,9 +176,10 @@ void PhysicsSystem2dImpl::update(float dt) {
                 physicsObjectData(phy_obj_b.value());
 
             if (data.mass > 0) {
-                // move apart by collision normal and penetration depth (opposite
-                // direction)
-                data.position += pair.contact.normal * -pair.contact.penetration;
+                // move apart by collision normal and penetration depth
+                // (opposite direction)
+                data.position +=
+                    pair.contact.normal * -pair.contact.penetration;
 
                 // adjust previous position based on impulse and mass (opposite
                 // direction)

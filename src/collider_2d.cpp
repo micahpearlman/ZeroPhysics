@@ -86,7 +86,9 @@ void CircleCollider2dImpl::setCircle(const circle_2d_t &circle) {
     updateAabb();
 }
 
-const aabb_2d_t &CircleCollider2dImpl::aabb() const { return data().aabb; }
+const aabb_2d_t &CircleCollider2dImpl::aabb() const {
+    return data().aabb;
+}
 
 void CircleCollider2dImpl::updateAabb() {
     aabb_2d_t         &aabb = data().aabb;
@@ -143,7 +145,9 @@ void LineCollider2dImpl::setLine(const line_segment_2d_t &line) {
 
 line_segment_2d_t LineCollider2dImpl::line() const { return data().line; }
 
-const aabb_2d_t &LineCollider2dImpl::aabb() const { return data().aabb; }
+const aabb_2d_t &LineCollider2dImpl::aabb() const {
+    return data().aabb;
+}
 
 void LineCollider2dImpl::updateAabb() {
     aabb_2d_t               &aabb = data().aabb;

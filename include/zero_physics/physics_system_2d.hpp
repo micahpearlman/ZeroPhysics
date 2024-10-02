@@ -17,6 +17,7 @@
 #include <optional>
 #include <memory>
 #include <glm/glm.hpp>
+
 namespace zo {
 class PhysicsSystem2d {
 
@@ -26,8 +27,9 @@ class PhysicsSystem2d {
     /// @param max_num_objects maximum number of physics objects
     /// @param iterations number of iterations to perform per update time step
     /// @return the physics system
-    static std::shared_ptr<PhysicsSystem2d> create(size_t max_num_objects,
-                                                   int    iterations);
+    static std::shared_ptr<PhysicsSystem2d>
+    create(size_t max_num_objects = 1024, int iterations = 1,
+           BroadPhaseType broad_phase_type = BroadPhaseType::NAIVE);
 
     /// @brief  Update the physics system.
     /// @param dt The time step to update the physics system by.
@@ -58,22 +60,22 @@ class PhysicsSystem2d {
     virtual std::unique_ptr<PhysicsObject2d> createPhysicsObject() = 0;
 
     /// @brief destroys a physics object via its handle.
-    /// @param hndl 
+    /// @param hndl
     virtual void destroyPhysicsObject(phy_obj_handle_2d_t hndl) = 0;
-    
+
     /// @brief destroys a physics object via its unique pointer.
     /// @param obj pointer to the physics object
-    virtual void destroyPhysicsObject(std::unique_ptr<PhysicsObject2d> &obj) = 0;
+    virtual void
+    destroyPhysicsObject(std::unique_ptr<PhysicsObject2d> &obj) = 0;
 
     /// @brief checks if the physics handle is valid
-    /// @param hndl 
+    /// @param hndl
     /// @return true if the handle is valid
     virtual bool isPhysicsHandleValid(phy_obj_handle_2d_t hndl) const = 0;
 
     /// @brief Get the collision system
-    /// @return 
+    /// @return
     virtual CollisionSystem2d &collisionSystem() = 0;
-
 };
 } // namespace zo
 

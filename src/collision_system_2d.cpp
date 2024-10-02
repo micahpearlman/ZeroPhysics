@@ -33,6 +33,9 @@ CollisionSystem2dImpl::CollisionSystem2dImpl(size_t         max_colliders,
     case BroadPhaseType::NAIVE: {
         _broad_phase = std::make_unique<NaiveBroadPhase>(*this);
     } break;
+    case BroadPhaseType::GRID: {
+        _broad_phase = std::make_unique<GridBroadPhase>(*this, 50); // HARDWIRED! TODO: make grid size configurable
+    } break;
     default:
         throw std::runtime_error("Unsupported broad phase type");
         break;

@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 
     /// initialize the physics system
     std::shared_ptr<zo::PhysicsSystem2d> physics_system =
-        zo::PhysicsSystem2d::create(1024, 1);
+        zo::PhysicsSystem2d::create(1024, 1, zo::BroadPhaseType::GRID);
 
     // create a physics object
     std::unique_ptr<zo::PhysicsObject2d> ball_phy_obj_1 =

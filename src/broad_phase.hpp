@@ -37,7 +37,8 @@ class NaiveBroadPhase : public BroadPhase {
     NaiveBroadPhase(CollisionSystem2dImpl &collision_system)
         : BroadPhase(collision_system) {}
 
-    void                              generateCollisionPairs() override;
+    void generateCollisionPairs() override;
+
     const std::vector<CollisionPair> &collisionPairs() const override {
         return _collision_pairs;
     }
@@ -45,5 +46,41 @@ class NaiveBroadPhase : public BroadPhase {
   private:
     std::vector<CollisionPair> _collision_pairs;
 };
+
+class GridBroadPhase : public BroadPhase {
+  public:
+    GridBroadPhase(CollisionSystem2dImpl &collision_system, int grid_size)
+        : BroadPhase(collision_system), _grid_size(grid_size) {}
+
+    void generateCollisionPairs() override;
+
+    const std::vector<CollisionPair> &collisionPairs() const override {
+        return _collision_pairs;
+    }
+
+  private:
+    // Custom hash function for std::pair<int, int>
+    struct pair_hash {
+        template <class T1, class T2>
+        std::size_t operator()(const std::pair<T1, T2> &pair) const {
+            auto hash1 = std::hash<T1>{}(pair.first);
+            auto hash2 = std::hash<T2>{}(pair.second);
+            return hash1 ^ (hash2 << 1); // Combine the two hash values
+        }
+    };
+
+    struct collision_pair_hash {
+        std::size_t operator()(const CollisionPair &pair) const {
+            auto hash1 = std::hash<uint32_t>{}(pair.a.handle);
+            auto hash2 = std::hash<uint32_t>{}(pair.b.handle);
+            return hash1 ^ (hash2 << 1); // Combine the two hash values
+        }
+    };
+
+  private:
+    std::vector<CollisionPair> _collision_pairs;
+    int                        _grid_size = 50;
+};
+
 } // namespace zo
 #endif // __broaphase_h__

@@ -19,7 +19,7 @@
 namespace zo {
 class PhysicsSystem2dImpl : public PhysicsSystem2d {
   public:
-    PhysicsSystem2dImpl(size_t max_num_objects, float iterations);
+    PhysicsSystem2dImpl(size_t max_num_objects, float iterations, BroadPhaseType broad_phase_type);
     virtual ~PhysicsSystem2dImpl() = default;
 
     void update(float dt) override;

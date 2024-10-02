@@ -36,6 +36,10 @@ struct CollisionPair {
     ColliderHandle a;
     ColliderHandle b;
     contact_2d_t   contact;
+
+    bool operator==(const CollisionPair &rhs) const {
+        return a.handle == rhs.a.handle && b.handle == rhs.b.handle;
+    }
 };
 
 } // namespace zo
