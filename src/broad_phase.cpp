@@ -46,14 +46,6 @@ void GridBroadPhase::generateCollisionPairs() {
         const int       mx_x = std::floor(mx.x);
         const int       mx_y = std::floor(mx.y);
 
-        if (hndl.type == uint8_t(ColliderType::LINE)) {
-            std::cout << "Line Collider: " << mn_x << " " << mn_y << " " << mx_x << " " << mx_y << std::endl;
-        }
-
-        if (hndl.type == uint8_t(ColliderType::CIRCLE)) {
-            std::cout << "Circle Collider: " << mn_x << " " << mn_y << " " << mx_x << " " << mx_y << std::endl;
-        }
-
 
         for (int x = mn_x; x <= mx_x; x++) {
             for (int y = mn_y; y <= mx_y; y++) {
@@ -83,6 +75,7 @@ void GridBroadPhase::generateCollisionPairs() {
         }
     }
 
+    // finally copy the collision pairs to the vector
     for (const auto &pair : collision_pair_set) {
         _collision_pairs.emplace_back(pair);
     }

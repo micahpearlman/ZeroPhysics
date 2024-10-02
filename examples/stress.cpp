@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
     constexpr int MAX_PHYSICS_OBJECTS = 1000 * 10;
     ;
     std::shared_ptr<zo::PhysicsSystem2d> physics_system =
-        zo::PhysicsSystem2d::create(MAX_PHYSICS_OBJECTS, 1);
+        zo::PhysicsSystem2d::create(MAX_PHYSICS_OBJECTS, 1, zo::BroadPhaseType::GRID);
 
     std::vector<std::unique_ptr<GameObject>> game_objects;
 
