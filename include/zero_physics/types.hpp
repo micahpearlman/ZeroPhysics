@@ -29,14 +29,17 @@ using collider_pair_t = CollisionPair;
 // collider enum
 enum class ColliderType { CIRCLE = 1, LINE = 2, BOX = 3, MAX = 4 };
 
+// broad phase detector
+enum class BroadPhaseType { NAIVE = 1, GRID = 2, SWEEP_PRUNE = 3 };
+
 struct line_segment_2d_t {
     glm::vec2 start;
     glm::vec2 end;
 };
 
 struct aabb_2d_t {
-    glm::vec2 min;
-    glm::vec2 max;
+    glm::vec2 mn;
+    glm::vec2 mx;
 };
 
 struct circle_2d_t {

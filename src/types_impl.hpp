@@ -27,6 +27,7 @@ union ColliderHandle {
         uint32_t index : 28;
     };
 
+    /// @brief The packed handle
     uint32_t handle;
 };
 

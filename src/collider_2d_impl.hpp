@@ -22,12 +22,13 @@ class CollisionSystem2dImpl;
 class Collider2dImpl : virtual public Collider2d {
   public:
     struct alignas(std::max_align_t) Data {
-        uint8_t  type = uint8_t(ColliderType::MAX);
-        bool     is_sensor = false;
-        float    friction = 0.0f;
-        float    restitution = 0.83;
-        uint16_t category_bits = 0;
-        uint16_t mask_bits = 0;
+        uint8_t   type = uint8_t(ColliderType::MAX);
+        bool      is_sensor = false;
+        float     friction = 0.0f;
+        float     restitution = 0.83;
+        uint16_t  category_bits = 0;
+        uint16_t  mask_bits = 0;
+        aabb_2d_t aabb;
     };
 
     CollisionSystem2dImpl &_sys;
@@ -71,11 +72,25 @@ class CircleCollider2dImpl : public Collider2dImpl, public CircleCollider2d {
     void        setCircle(const circle_2d_t &circle) override;
     circle_2d_t circle() const override;
 
+    const aabb_2d_t& aabb() const override;
+
+    /// @brief Update the axis aligned bounding box
+    void updateAabb();
+
+    /// @brief Get the base collider data
+    /// @return Collider2dImpl::Data& base collider data
     Collider2dImpl::Data       &baseData() override;
+
+    /// @brief Get the base collider data
+    /// @return const Collider2dImpl::Data& base collider data
     const Collider2dImpl::Data &baseData() const override;
 
+    /// @brief Get the circle collider data
+    /// @return CircleCollider2dImpl::Data
     CircleCollider2dImpl::Data &data() { return _data; }
 
+    /// @brief Get the circle collider data
+    /// @return const CircleCollider2dImpl::Data
     CircleCollider2dImpl::Data const &data() const { return _data; }
 
   private:
@@ -99,11 +114,22 @@ class LineCollider2dImpl : public Collider2dImpl, public LineCollider2d {
     void              setLine(const line_segment_2d_t &line) override;
     line_segment_2d_t line() const override;
 
+    /// @brief Get the base collider data
+    /// @return Collider2dImpl::Data& base collider data
     Collider2dImpl::Data       &baseData() override;
     const Collider2dImpl::Data &baseData() const override;
 
+    /// @brief Update the axis aligned bounding box
+    void updateAabb();
+
+    const aabb_2d_t& aabb() const override;
+
+    /// @brief Get the line collider data
+    /// @return LineCollider2dImpl::Data
     LineCollider2dImpl::Data &data() { return _data; }
 
+    /// @brief Get the line collider data
+    /// @return const LineCollider2dImpl::Data
     LineCollider2dImpl::Data const &data() const { return _data; }
 
   private:

@@ -15,6 +15,7 @@
 #include <zero_physics/memory.hpp>
 #include "collider_2d_impl.hpp"
 #include "types_impl.hpp"
+#include "broad_phase.hpp"
 #include <optional>
 #include <vector>
 
@@ -22,7 +23,7 @@ namespace zo {
 
 class CollisionSystem2dImpl : public CollisionSystem2d {
   public:
-    CollisionSystem2dImpl(size_t max_colliders);
+    CollisionSystem2dImpl(size_t max_colliders, BroadPhaseType broad_phase_type);
     ~CollisionSystem2dImpl() = default;
 
     void destroyCollider(collider_handle_2d_t hndl) override;
@@ -33,6 +34,11 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
     /// @return
     std::optional<collider_handle_2d_t> createCollider(ColliderType type);
 
+    /// @brief Get specialized collider data (CircleCollider2dImpl::Data or
+    /// LineCollider2dImpl::Data) from the collider handle.
+    /// @tparam T
+    /// @param hndl the collider handle
+    /// @return The collider data
     template <typename T> T &getColliderData(const collider_handle_2d_t &hndl) {
         if constexpr (std::is_same_v<T, CircleCollider2dImpl::Data>) {
             return _circle_collider_pool[hndl.index];
@@ -45,7 +51,13 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
         }
     }
 
-    template <typename T> const T &getColliderData(const collider_handle_2d_t &hndl) const {
+    /// @brief Get specialized collider data (CircleCollider2dImpl::Data or
+    /// LineCollider2dImpl::Data) from the collider handle.
+    /// @tparam T
+    /// @param hndl the collider handle
+    /// @return The collider data
+    template <typename T>
+    const T &getColliderData(const collider_handle_2d_t &hndl) const {
         if constexpr (std::is_same_v<T, CircleCollider2dImpl::Data>) {
             return _circle_collider_pool[hndl.index];
         } else if constexpr (std::is_same_v<T, LineCollider2dImpl::Data>) {
@@ -57,20 +69,29 @@ class CollisionSystem2dImpl : public CollisionSystem2d {
         }
     }
 
-    Collider2dImpl::Data &getBaseColliderData(const collider_handle_2d_t &hndl);
+    const Collider2dImpl::Data &
+    getBaseColliderData(const collider_handle_2d_t &hndl) const;
 
     void generateCollisionPairs() override;
 
     /// @brief Get the collision pairs
     /// @return
-    std::vector<CollisionPair> &collisionPairs() {
+    const std::vector<CollisionPair> &collisionPairs() const {
         return _collision_pairs;
+    }
+
+    /// @brief Get the collider store
+    /// @return const ComponentStore<ColliderHandle>& the collider store
+    const ComponentStore<ColliderHandle> &colliders() const {
+        return _colliders;
     }
 
   private:
     MemoryPool<CircleCollider2dImpl::Data> _circle_collider_pool;
     MemoryPool<LineCollider2dImpl::Data>   _line_collider_pool;
     ComponentStore<ColliderHandle>         _colliders;
+
+    std::unique_ptr<BroadPhase> _broad_phase = nullptr;
 
     std::vector<CollisionPair> _collision_pairs;
 };

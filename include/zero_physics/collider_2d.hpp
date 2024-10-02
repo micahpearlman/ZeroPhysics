@@ -37,6 +37,7 @@ class Collider2d {
     virtual void  setFilter(uint16_t categoryBits, uint16_t maskBits) = 0;
     virtual void  getFilter(uint16_t &categoryBits,
                             uint16_t &maskBits) const = 0;
+    virtual const aabb_2d_t     &aabb() const = 0;
     virtual collider_handle_2d_t handle() const = 0;
     virtual ColliderType         type() const = 0;
 

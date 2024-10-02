@@ -117,9 +117,9 @@ void PhysicsSystem2dImpl::update(float dt) {
             continue;
         }
 
-        Collider2dImpl::Data &col_data_a =
+        const Collider2dImpl::Data &col_data_a =
             _collision_system->getBaseColliderData(pair.a);
-        Collider2dImpl::Data &col_data_b =
+        const Collider2dImpl::Data &col_data_b =
             _collision_system->getBaseColliderData(pair.b);
 
         // calculate the relative velocities along the collision normal

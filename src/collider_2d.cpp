@@ -69,18 +69,30 @@ CircleCollider2dImpl::CircleCollider2dImpl(
 
 void CircleCollider2dImpl::setRadius(float radius) {
     data().circle.radius = radius;
+    updateAabb();
 }
 
 float CircleCollider2dImpl::radius() const { return data().circle.radius; }
 
 void CircleCollider2dImpl::setCenter(const glm::vec2 &center) {
     data().circle.center = center;
+    updateAabb();
 }
 
 glm::vec2 CircleCollider2dImpl::center() const { return data().circle.center; }
 
 void CircleCollider2dImpl::setCircle(const circle_2d_t &circle) {
     data().circle = circle;
+    updateAabb();
+}
+
+const aabb_2d_t &CircleCollider2dImpl::aabb() const { return data().aabb; }
+
+void CircleCollider2dImpl::updateAabb() {
+    aabb_2d_t         &aabb = data().aabb;
+    const circle_2d_t &circle = data().circle;
+    aabb.mn = circle.center - glm::vec2{circle.radius, circle.radius};
+    aabb.mx = circle.center + glm::vec2{circle.radius, circle.radius};
 }
 
 circle_2d_t CircleCollider2dImpl::circle() const { return data().circle; }
@@ -112,19 +124,33 @@ LineCollider2dImpl::LineCollider2dImpl(CollisionSystem2dImpl &collision_system,
 
 void LineCollider2dImpl::setStart(const glm::vec2 &start) {
     data().line.start = start;
+    updateAabb();
 }
 
 glm::vec2 LineCollider2dImpl::start() const { return data().line.start; }
 
-void LineCollider2dImpl::setEnd(const glm::vec2 &end) { data().line.end = end; }
+void LineCollider2dImpl::setEnd(const glm::vec2 &end) {
+    data().line.end = end;
+    updateAabb();
+}
 
 glm::vec2 LineCollider2dImpl::end() const { return data().line.end; }
 
 void LineCollider2dImpl::setLine(const line_segment_2d_t &line) {
     data().line = line;
+    updateAabb();
 }
 
 line_segment_2d_t LineCollider2dImpl::line() const { return data().line; }
+
+const aabb_2d_t &LineCollider2dImpl::aabb() const { return data().aabb; }
+
+void LineCollider2dImpl::updateAabb() {
+    aabb_2d_t               &aabb = data().aabb;
+    const line_segment_2d_t &line = data().line;
+    aabb.mn = glm::min(line.start, line.end);
+    aabb.mx = glm::max(line.start, line.end);
+}
 
 Collider2dImpl::Data &LineCollider2dImpl::baseData() { return data(); }
 

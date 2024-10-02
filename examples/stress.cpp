@@ -209,6 +209,7 @@ int main(int argc, char **argv) {
         return -1;
     }
     glfwMakeContextCurrent(window);
+    glfwSwapInterval( 0 );
     vgCreateContextMNK(WINDOW_WIDTH, WINDOW_HEIGHT,
                        VG_RENDERING_BACKEND_TYPE_OPENGL33);
 
@@ -245,6 +246,7 @@ int main(int argc, char **argv) {
     const int   NUM_BALLS_ROW = width / ((BALL_RADIUS + 1.0f) * 2);
     const int   NUM_ROWS = 10;
     for (int r = 0; r < NUM_ROWS; r++) {
+        pos += glm::vec2(0, BALL_RADIUS * 2);
         for (int i = 0; i < NUM_BALLS_ROW; i++) {
             std::unique_ptr<Ball> ball =
                 std::make_unique<Ball>(physics_system, BALL_RADIUS);

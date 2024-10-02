@@ -24,6 +24,7 @@ set(ZOPHY_SOURCE_FILES
     src/collision_system_2d.cpp
     src/math.cpp
     src/physics_object_2d.cpp
+    src/broad_phase.cpp
 )
 set(ZOPHY_INCLUDE_DIRS
     ./include

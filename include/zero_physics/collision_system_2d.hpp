@@ -22,7 +22,7 @@ public:
     /// @brief Create collision system implementation.
     /// @param max_colliders Maximum number of colliders.
     /// @return 
-    static std::shared_ptr<CollisionSystem2d> create(size_t max_colliders);
+    static std::shared_ptr<CollisionSystem2d> create(size_t max_colliders, BroadPhaseType broad_phase_type = BroadPhaseType::NAIVE);
 
     virtual ~CollisionSystem2d() = default;
 
