@@ -86,9 +86,7 @@ void CircleCollider2dImpl::setCircle(const circle_2d_t &circle) {
     updateAabb();
 }
 
-const aabb_2d_t &CircleCollider2dImpl::aabb() const {
-    return data().aabb;
-}
+const aabb_2d_t &CircleCollider2dImpl::aabb() const { return data().aabb; }
 
 void CircleCollider2dImpl::updateAabb() {
     aabb_2d_t         &aabb = data().aabb;
@@ -125,35 +123,41 @@ LineCollider2dImpl::LineCollider2dImpl(CollisionSystem2dImpl &collision_system,
       _data{system().getColliderData<LineCollider2dImpl::Data>(handle)} {}
 
 void LineCollider2dImpl::setStart(const glm::vec2 &start) {
-    data().line.start = start;
+    data().line.line.start = start;
     updateAabb();
 }
 
-glm::vec2 LineCollider2dImpl::start() const { return data().line.start; }
+glm::vec2 LineCollider2dImpl::start() const { return data().line.line.start; }
 
 void LineCollider2dImpl::setEnd(const glm::vec2 &end) {
-    data().line.end = end;
+    data().line.line.end = end;
     updateAabb();
 }
 
-glm::vec2 LineCollider2dImpl::end() const { return data().line.end; }
+glm::vec2 LineCollider2dImpl::end() const { return data().line.line.end; }
 
-void LineCollider2dImpl::setLine(const line_segment_2d_t &line) {
+void LineCollider2dImpl::setLine(const thick_line_segment_2d_t &line) {
     data().line = line;
     updateAabb();
 }
 
-line_segment_2d_t LineCollider2dImpl::line() const { return data().line; }
+thick_line_segment_2d_t LineCollider2dImpl::line() const { return data().line; }
 
-const aabb_2d_t &LineCollider2dImpl::aabb() const {
-    return data().aabb;
+void LineCollider2dImpl::setThickness(float thickness) {
+    data().line.radius = thickness;
+    updateAabb();
 }
 
+float LineCollider2dImpl::thickness() const { return data().line.radius; }
+
+const aabb_2d_t &LineCollider2dImpl::aabb() const { return data().aabb; }
+
 void LineCollider2dImpl::updateAabb() {
-    aabb_2d_t               &aabb = data().aabb;
-    const line_segment_2d_t &line = data().line;
-    aabb.mn = glm::min(line.start, line.end);
-    aabb.mx = glm::max(line.start, line.end);
+    aabb_2d_t                     &aabb = data().aabb;
+    const thick_line_segment_2d_t &line = data().line;
+    const glm::vec2 thickness{line.radius, line.radius};
+    aabb.mn = glm::min(line.line.start-thickness, line.line.end+thickness);
+    aabb.mx = glm::max(line.line.start-thickness, line.line.end+thickness);
 }
 
 Collider2dImpl::Data &LineCollider2dImpl::baseData() { return data(); }

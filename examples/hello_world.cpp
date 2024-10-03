@@ -147,10 +147,11 @@ int main(int argc, char **argv) {
         glm::vec2{800, 100}
     }};
 
+    const float WALL_THICKNESS = 5.0f;
     // left wall collider
     std::unique_ptr<zo::LineCollider2d> left_wall_col =
         collision_system.createCollider<zo::LineCollider2d>();
-    zo::line_segment_2d_t left_wall_segment{segments[0], segments[1]};
+    zo::thick_line_segment_2d_t left_wall_segment{segments[0], segments[1], WALL_THICKNESS};
     left_wall_col->setLine(left_wall_segment);
 
 
@@ -158,13 +159,13 @@ int main(int argc, char **argv) {
     std::unique_ptr<zo::LineCollider2d> floor_col =
         collision_system.createCollider<zo::LineCollider2d>();
 
-    zo::line_segment_2d_t floor_segment = {segments[1], segments[2]};
+    zo::thick_line_segment_2d_t floor_segment = {segments[1], segments[2], WALL_THICKNESS};
     floor_col->setLine(floor_segment);
 
     // right wall collider
     std::unique_ptr<zo::LineCollider2d> right_wall_col =
         collision_system.createCollider<zo::LineCollider2d>();
-    zo::line_segment_2d_t right_wall_segment = {segments[2], segments[3]};
+    zo::thick_line_segment_2d_t right_wall_segment = {segments[2], segments[3], WALL_THICKNESS};
     right_wall_col->setLine(right_wall_segment);
 
 

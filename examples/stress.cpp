@@ -82,7 +82,7 @@ class GameObject {
         vgTranslate(pos.x, pos.y);
 
         // set stroke width
-        vgSetf(VG_STROKE_LINE_WIDTH, 5.0f);
+        vgSetf(VG_STROKE_LINE_WIDTH, 1.0f);
 
         // fill and stroke paints
         vgSetPaint(_fill_paint, VG_FILL_PATH);
@@ -119,7 +119,7 @@ class Ball : public GameObject {
         physicsObject().setCollider(*circle_collider, 0);
 
         // create a circle path
-        vguEllipse(path(), 0.0f, 0.0f, radius, radius);
+        vguEllipse(path(), 0.0f, 0.0f, radius*2, radius*2);
 
         // generate random fill color
         VGfloat fill_color[4] = {(float)rand() / (float)RAND_MAX,
@@ -133,6 +133,8 @@ class Ball : public GameObject {
                                    (float)rand() / (float)RAND_MAX, 1.0f};
         vgSetParameterfv(strokePaint(), VG_PAINT_COLOR, 4, &stroke_color[0]);
     }
+
+
 
     virtual ~Ball() {
         // std::cout << "Ball destroyed\n";
@@ -163,8 +165,8 @@ class StaticBox : public GameObject {
         for (int i = 0; i < 4; i++) {
             std::unique_ptr<zo::LineCollider2d> line_collider =
                 collision_system.createCollider<zo::LineCollider2d>();
-            zo::line_segment_2d_t line_segment = {vertices[i],
-                                                  vertices[(i + 1) % 4]};
+            zo::thick_line_segment_2d_t line_segment = {vertices[i],
+                                                  vertices[(i + 1) % 4], 5.0f};
             line_collider->setLine(line_segment);
             _line_colliders.push_back(std::move(line_collider));
         }
@@ -238,7 +240,7 @@ int main(int argc, char **argv) {
     glViewport(0, 0, width, height);
 
     /// random seed
-    srand(time(NULL));
+    srand(42);
 
     /// initialize the physics system
     constexpr int MAX_PHYSICS_OBJECTS = 1000 * 10;
@@ -254,14 +256,24 @@ int main(int argc, char **argv) {
     game_objects.push_back(std::move(box));
 
     std::vector<float> game_obj_lifetime;
-    game_obj_lifetime.push_back(0);
+    game_obj_lifetime.push_back(0); // static box
+
+    /// create a ball to shoot
+    std::unique_ptr<Ball> ball =
+        std::make_unique<Ball>(physics_system, 30.0f);
+    ball->physicsObject().setPosition({150, height-150});
+    ball->physicsObject().setMass(10.0f);
+    ball->physicsObject().setVelocity({500, -500});
+    game_objects.push_back(std::move(ball));
+    game_obj_lifetime.push_back(30);
+
 
     // create a row of balls with random velocities
     const float BALL_RADIUS = 5.0f;
     const float OFFSET = BALL_RADIUS + 5.0f;
     const float Y_POS = 100;
     glm::vec2   pos = {OFFSET, Y_POS};
-    const int   NUM_BALLS_ROW = (width - OFFSET) / (OFFSET * 2);
+    const int   NUM_BALLS_ROW = (width - (OFFSET)) / (OFFSET * 2);
     const int   NUM_ROWS = 25;
     for (int r = 0; r < NUM_ROWS; r++) {
         pos += glm::vec2(0, OFFSET * 2);
@@ -271,8 +283,8 @@ int main(int argc, char **argv) {
                 std::make_unique<Ball>(physics_system, BALL_RADIUS);
             pos += glm::vec2(OFFSET * 2, 0);
             ball->physicsObject().setPosition(pos);
-            ball->physicsObject().setVelocity(
-                {(float)(rand() % 200) - 100, (float)(rand() % 200) - 100});
+            // ball->physicsObject().setVelocity(
+            //     {(float)(rand() % 200) - 100, (float)(rand() % 200) - 100});
             game_objects.push_back(std::move(ball));
             game_obj_lifetime.push_back(rand() % 30);
         }

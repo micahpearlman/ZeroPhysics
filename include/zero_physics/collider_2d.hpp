@@ -69,12 +69,14 @@ class CircleCollider2d : virtual public Collider2d {
 class LineCollider2d : virtual public Collider2d {
   public:
     virtual ~LineCollider2d() = default;
-    virtual void              setStart(const glm::vec2 &start) = 0;
-    virtual glm::vec2         start() const = 0;
-    virtual void              setEnd(const glm::vec2 &end) = 0;
-    virtual glm::vec2         end() const = 0;
-    virtual void              setLine(const line_segment_2d_t &line) = 0;
-    virtual line_segment_2d_t line() const = 0;
+    virtual void                    setStart(const glm::vec2 &start) = 0;
+    virtual glm::vec2               start() const = 0;
+    virtual void                    setEnd(const glm::vec2 &end) = 0;
+    virtual glm::vec2               end() const = 0;
+    virtual void                    setThickness(float thickness) = 0;
+    virtual float                   thickness() const = 0;
+    virtual void                    setLine(const thick_line_segment_2d_t &line) = 0;
+    virtual thick_line_segment_2d_t line() const = 0;
 
     ColliderType type() const override { return ColliderType::LINE; }
 

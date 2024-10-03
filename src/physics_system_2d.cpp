@@ -81,14 +81,15 @@ void PhysicsSystem2dImpl::update(float dt) {
                             ->getColliderData<LineCollider2dImpl::Data>(
                                 data.collider);
                     if (data.collider_vertex == 0) {
-                        collider.line.start = data.position;
+                        collider.line.line.start = data.position;
                     } else {
-                        collider.line.end = data.position;
+                        collider.line.line.end = data.position;
                     }
 
                     // update the aabb
-                    collider.aabb.mn = glm::min(collider.line.start, collider.line.end);
-                    collider.aabb.mx = glm::max(collider.line.start, collider.line.end);
+                    const glm::vec2 thickness = glm::vec2{collider.line.radius, collider.line.radius};
+                    collider.aabb.mn = glm::min(collider.line.line.start-thickness, collider.line.line.end+thickness);
+                    collider.aabb.mx = glm::max(collider.line.line.start-thickness, collider.line.line.end+thickness);
                     
                 }
             }

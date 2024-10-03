@@ -72,14 +72,14 @@ class CircleCollider2dImpl : public Collider2dImpl, public CircleCollider2d {
     void        setCircle(const circle_2d_t &circle) override;
     circle_2d_t circle() const override;
 
-    const aabb_2d_t& aabb() const override;
+    const aabb_2d_t &aabb() const override;
 
     /// @brief Update the axis aligned bounding box
     void updateAabb();
 
     /// @brief Get the base collider data
     /// @return Collider2dImpl::Data& base collider data
-    Collider2dImpl::Data       &baseData() override;
+    Collider2dImpl::Data &baseData() override;
 
     /// @brief Get the base collider data
     /// @return const Collider2dImpl::Data& base collider data
@@ -100,19 +100,21 @@ class CircleCollider2dImpl : public Collider2dImpl, public CircleCollider2d {
 class LineCollider2dImpl : public Collider2dImpl, public LineCollider2d {
   public:
     struct alignas(std::max_align_t) Data : Collider2dImpl::Data {
-        line_segment_2d_t line;
+        thick_line_segment_2d_t line;
     };
 
   public:
     LineCollider2dImpl(CollisionSystem2dImpl &collision_system,
                        collider_handle_2d_t   handle);
     virtual ~LineCollider2dImpl() = default;
-    void              setStart(const glm::vec2 &start) override;
-    glm::vec2         start() const override;
-    void              setEnd(const glm::vec2 &end) override;
-    glm::vec2         end() const override;
-    void              setLine(const line_segment_2d_t &line) override;
-    line_segment_2d_t line() const override;
+    void      setStart(const glm::vec2 &start) override;
+    glm::vec2 start() const override;
+    void      setEnd(const glm::vec2 &end) override;
+    glm::vec2 end() const override;
+    void      setThickness(float thickness) override;
+    float     thickness() const override;
+    void      setLine(const thick_line_segment_2d_t &line) override;
+    thick_line_segment_2d_t line() const override;
 
     /// @brief Get the base collider data
     /// @return Collider2dImpl::Data& base collider data
@@ -122,7 +124,7 @@ class LineCollider2dImpl : public Collider2dImpl, public LineCollider2d {
     /// @brief Update the axis aligned bounding box
     void updateAabb();
 
-    const aabb_2d_t& aabb() const override;
+    const aabb_2d_t &aabb() const override;
 
     /// @brief Get the line collider data
     /// @return LineCollider2dImpl::Data

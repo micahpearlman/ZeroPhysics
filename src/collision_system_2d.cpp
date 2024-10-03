@@ -137,7 +137,7 @@ void CollisionSystem2dImpl::generateCollisionPairs() {
                 getColliderData<CircleCollider2dImpl::Data>(pair.a);
             const auto &c2_data =
                 getColliderData<LineCollider2dImpl::Data>(pair.b);
-            if (circleToLineSegment(c1_data.circle, c2_data.line, contact)) {
+            if (circleToThickLineSegment(c1_data.circle, c2_data.line, contact)) {
                 _collision_pairs.emplace_back(pair);
                 _collision_pairs.back().contact = contact;
             }
@@ -147,7 +147,7 @@ void CollisionSystem2dImpl::generateCollisionPairs() {
                 getColliderData<LineCollider2dImpl::Data>(pair.a);
             const auto &c2_data =
                 getColliderData<CircleCollider2dImpl::Data>(pair.b);
-            if (circleToLineSegment(c2_data.circle, c1_data.line, contact)) {
+            if (circleToThickLineSegment(c2_data.circle, c1_data.line, contact)) {
                 CollisionPair pair_flip = {pair.b, pair.a, contact};
                 pair_flip.contact.normal = -pair_flip.contact.normal;
                 _collision_pairs.emplace_back(pair_flip);
