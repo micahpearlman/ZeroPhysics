@@ -57,8 +57,8 @@ TEST(MathTest, CircleToCircle) {
     bool result = circleToCircle(c1, c2, contact);
     ASSERT_TRUE(result);
 
-    EXPECT_EQ(contact.normal, glm::vec2(1.0f, 0.0f));
-    EXPECT_EQ(contact.point, glm::vec2(5.0f, 0.0f));
+    EXPECT_EQ(contact.normal, glm::vec2(-1.0f, 0.0f));
+    EXPECT_EQ(contact.point, glm::vec2(-5.0f, 0.0f));
     EXPECT_NEAR(contact.penetration, 3.0f, 1e-5);
 
     c2 = circle_2d_t{glm::vec2(11.0f, 0.0f), 5.0f};

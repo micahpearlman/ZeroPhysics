@@ -33,6 +33,9 @@
 #include <string>
 #include <iomanip>
 #include <memory>
+#include <vector>
+#include <array>
+#include <random>
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
@@ -70,7 +73,7 @@ class GameObject {
 
     VGPaint &strokePaint() { return _stroke_paint; }
 
-    void draw() {
+    virtual void draw() {
 
         // set up path trasnform
         vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
@@ -87,9 +90,14 @@ class GameObject {
 
         // draw the path with fill and stroke
         vgDrawPath(_path, VG_FILL_PATH | VG_STROKE_PATH);
+
+        // if (_phy_obj->mass() == 0) {
+        //     std::cout << "Static object\n";
+        // }
     }
 
-    ~GameObject() {
+    virtual ~GameObject() {
+        // std::cout << "\tGameObject destroyed: " << _phy_obj->handle() << "\n";
         vgDestroyPath(_path);
         vgDestroyPaint(_fill_paint);
         vgDestroyPaint(_stroke_paint);
@@ -125,6 +133,10 @@ class Ball : public GameObject {
                                    (float)rand() / (float)RAND_MAX, 1.0f};
         vgSetParameterfv(strokePaint(), VG_PAINT_COLOR, 4, &stroke_color[0]);
     }
+
+    virtual ~Ball() {
+        // std::cout << "Ball destroyed\n";
+    }
 };
 
 class StaticBox : public GameObject {
@@ -136,8 +148,7 @@ class StaticBox : public GameObject {
               float height)
         : GameObject(physics_system) {
 
-        // physicsObject().setPosition({width/2, height/2});
-        physicsObject().setMass(0); // static object
+        physicsObject().setMass(0); // 0 is static object
 
         glm::vec2                offset = {width / 2, height / 2};
         std::array<glm::vec2, 4> vertices = {
@@ -171,6 +182,15 @@ class StaticBox : public GameObject {
                                    (float)rand() / (float)RAND_MAX,
                                    (float)rand() / (float)RAND_MAX, 1.0f};
         vgSetParameterfv(strokePaint(), VG_PAINT_COLOR, 4, &stroke_color[0]);
+    }
+
+    // void draw() override {
+    //     std::cout << "StaticBox draw\n";
+    //     GameObject::draw();
+    // }
+
+    virtual ~StaticBox() {
+        std::cout << "StaticBox destroyed\n";
     }
 };
 
@@ -234,9 +254,11 @@ int main(int argc, char **argv) {
 
     // create a static box
     std::unique_ptr<StaticBox> box =
-        std::make_unique<StaticBox>(physics_system, width, 500);
-
+        std::make_unique<StaticBox>(physics_system, width, height/2);
     game_objects.push_back(std::move(box));
+
+    std::vector<float> game_obj_lifetime;
+    game_obj_lifetime.push_back(0);
 
     // create a row of balls with random velocities
     const float BALL_RADIUS = 5.0f;
@@ -255,15 +277,9 @@ int main(int argc, char **argv) {
             ball->physicsObject().setVelocity(
                 {(float)(rand() % 200) - 100, (float)(rand() % 200) - 100});
             game_objects.push_back(std::move(ball));
+            game_obj_lifetime.push_back(rand() % 5);
         }
     }
-
-    // create a ball
-    // std::unique_ptr<Ball> ball =
-    // std::make_unique<Ball>(physics_system, 50.0f);
-    // ball->physicsObject().setPosition({300, 100});
-    // ball->physicsObject().setVelocity({50, 0});
-    // game_objects.push_back(std::move(ball));
 
     // set gravity
     physics_system->addGlobalForce({0, 120.0f});
@@ -288,8 +304,9 @@ int main(int argc, char **argv) {
         last_time = glfwGetTime();
 
         // draw the game objects
-        for (auto &go : game_objects) {
-            go->draw();
+        for (int i = 0; i < game_objects.size(); i++) {
+            game_objects[i]->draw();
+            game_obj_lifetime[i] -= delta_time;
         }
 
         // pop the ortho camera
@@ -318,17 +335,21 @@ int main(int argc, char **argv) {
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        // reset ball on space bar
-        // if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        //     // reset all objects
+        // remove game objects that have expired
+        for (int i = game_obj_lifetime.size()-1; i >= 1; i--) {
+            if (game_obj_lifetime[i] < 0) {
+                game_objects.erase(game_objects.begin() + i);  
+                game_obj_lifetime.erase(game_obj_lifetime.begin() + i);
+            }
+        }
 
-        //     ball_phy_obj->setPosition({300, 100});
-        //     ball_phy_obj->setVelocity({500, 0});
-        // }
 
     } // Check if the ESC key was pressed or the window was closed
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0);
+
+    // clear the game objects
+    game_objects.clear();
 
     // destroy MonkVG
     vgDestroyContextMNK();

@@ -185,16 +185,17 @@ template <typename T> class MemoryPool {
 /**
  * @brief A component store that uses a vector to store components and a map to
  * store the handle to index mapping. This is intended to be be an efficient way
- * to store components as it provides data locality and O(1) access to
- * components. Adding and removing components is O(1) as well. 
+ * to store components as it provides data locality and O(1) access, addition
+ * and removal of elements, with the trade off of having extra memory overhead
+ * for mapping elements to handles.
  * Use this when you need to store a large number of components and iterate over
- * them sequentially.
+ * them sequentially very fast.
  *
  * @tparam T The type of component to store.
  */
 template <typename T> class ComponentStore {
   public:
-    using handle_t = uint64_t;
+    using handle_t = uint32_t;
 
     /**
      * @brief Add a component to the ComponentStore.
@@ -205,6 +206,7 @@ template <typename T> class ComponentStore {
     handle_t add(const T &component) {
         _components.push_back(component);
         _handle_to_idx[_next_handle] = _components.size() - 1;
+        _idx_to_handle[_components.size() - 1] = _next_handle;
         return _next_handle++;
     }
 
@@ -216,24 +218,37 @@ template <typename T> class ComponentStore {
      *
      * @param hndl The handle of the element to be removed.
      */
-    void remove(handle_t hndl) {
-        if (_handle_to_idx.contains(hndl) == false) {
+    void remove(handle_t remove_hndl) {
+        if (_handle_to_idx.contains(remove_hndl) == false) {
             return;
         }
-        size_t idx = _handle_to_idx[hndl];
+        size_t remove_idx = _handle_to_idx[remove_hndl];
         size_t last_idx = _components.size() - 1;
+        handle_t last_hndl = _idx_to_handle[last_idx];
 
-        // update the component array
-        std::swap(_components[idx], _components[last_idx]);
+        // delete the handle from the handle to index map
+        _handle_to_idx.erase(remove_hndl);
+
+        // delete the index from the index to handle map
+        _idx_to_handle.erase(remove_idx);
+
+
+        // update the component array by moving the last element to 
+        // the removed element's position
+        std::swap(_components[remove_idx], _components[last_idx]);
 
         // update the handle to index map
-        std::swap(_handle_to_idx[hndl], _handle_to_idx[last_idx]);
+        // remember the last element's handle is now the removed element's handle
+        _handle_to_idx[last_hndl] = remove_idx;
+
+        // update the index to handle map
+        // remember the last element's index is now the removed element's index
+        _idx_to_handle[remove_idx] = last_hndl;
+
 
         // remove the last element as it is now the element we want to remove
         _components.pop_back();
 
-        // remove from map
-        _handle_to_idx.erase(hndl);
     }
 
     /**
@@ -266,20 +281,30 @@ template <typename T> class ComponentStore {
         return std::nullopt;
     }
 
-    // Iterator support
+    void clear() {
+        _components.clear();
+        _handle_to_idx.clear();
+        _idx_to_handle.clear();
+        _next_handle = 0;
+    }
+
+    // STL iterator support
     std::vector<T>::iterator begin() { return _components.begin(); }
     std::vector<T>::iterator end() { return _components.end(); }
     std::vector<T>::iterator begin() const { return _components.begin(); }
     std::vector<T>::iterator end() const { return _components.end(); }
 
-    size_t size() const { return size_t(_next_handle); }
+
+    // accessors to the underlying data
+    size_t size() const { return _components.size(); }
     T& at(int idx) { return _components[idx]; }
     const T& at(int idx) const { return _components[idx]; } 
 
   private:
     std::vector<T>                         _components;
-    std::unordered_map<uint32_t, uint32_t> _handle_to_idx;
-    uint32_t                               _next_handle = 0;
+    std::unordered_map<handle_t, uint32_t> _handle_to_idx;
+    std::unordered_map<uint32_t, handle_t> _idx_to_handle;
+    handle_t                               _next_handle = 0;
 };
 }; // namespace zo
 

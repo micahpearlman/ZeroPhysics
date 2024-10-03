@@ -94,6 +94,50 @@ TEST_F(ComponentStoreTest, AddAndRemoveMultipleComponents) {
     EXPECT_EQ(retrieved3->get().value, 126);
 }
 
+TEST_F(ComponentStoreTest, AddAndRemoveMultipleComponents2) {
+    std::array<TestComponent, 7> components = {
+        TestComponent{1}, TestComponent{2}, TestComponent{3}, TestComponent{4},
+        TestComponent{5}, TestComponent{6}, TestComponent{7}};
+    std::array<ComponentStore<TestComponent>::handle_t, 7> handles;
+    for (size_t i = 0; i < components.size(); ++i) {
+        handles[i] = store.add(components[i]);
+    }
+
+    store.remove(handles[1]);
+    store.remove(handles[3]);
+    store.remove(handles[5]);
+    // check array is still valid
+    for (size_t i = 0; i < components.size(); ++i) {
+        auto retrieved = store.get(handles[i]);
+        if (i == 1 || i == 3 || i == 5) {
+            EXPECT_FALSE(retrieved.has_value());
+        } else {
+            ASSERT_TRUE(retrieved.has_value());
+            EXPECT_EQ(retrieved->get().value, components[i].value);
+        }
+    }
+}
+
+TEST_F(ComponentStoreTest, Clear) {
+    TestComponent component1{42};
+    TestComponent component2{84};
+    TestComponent component3{126};
+
+    auto handle1 = store.add(component1);
+    auto handle2 = store.add(component2);
+    auto handle3 = store.add(component3);
+
+    store.clear();
+
+    auto retrieved1 = store.get(handle1);
+    auto retrieved2 = store.get(handle2);
+    auto retrieved3 = store.get(handle3);
+
+    EXPECT_FALSE(retrieved1.has_value());
+    EXPECT_FALSE(retrieved2.has_value());
+    EXPECT_FALSE(retrieved3.has_value());
+}
+
 class MemoryPoolTest : public ::testing::Test {
   protected:
     MemoryPool<TestComponent> pool;
@@ -145,7 +189,6 @@ TEST_F(MemoryPoolTest, UseAsStdAllocator) {
     vec.push_back(TestComponent{42});
     vec.push_back(TestComponent{84});
 
-
     // check the elements
     ASSERT_EQ(vec.size(), 2);
     EXPECT_EQ(vec[0].value, 42);
@@ -154,7 +197,7 @@ TEST_F(MemoryPoolTest, UseAsStdAllocator) {
     // remove a element from the end
     vec.pop_back();
     EXPECT_EQ(vec.size(), 1);
-    EXPECT_EQ(vec[0].value, 42);    
+    EXPECT_EQ(vec[0].value, 42);
 
     // clear the vector and check
     vec.clear();
@@ -162,21 +205,18 @@ TEST_F(MemoryPoolTest, UseAsStdAllocator) {
 }
 
 TEST_F(MemoryPoolTest, PtrToIdx) {
-        auto *component = pool.allocate();
-        ASSERT_NE(component, nullptr);
-        size_t idx = pool.ptrToIdx(component);
-        EXPECT_EQ(component, pool.idxToPtr(idx));
-        pool.deallocate(component);
+    auto *component = pool.allocate();
+    ASSERT_NE(component, nullptr);
+    size_t idx = pool.ptrToIdx(component);
+    EXPECT_EQ(component, pool.idxToPtr(idx));
+    pool.deallocate(component);
 }
 
 TEST_F(MemoryPoolTest, IdxToPtr) {
-        auto *component = pool.allocate();
-        ASSERT_NE(component, nullptr);
-        size_t idx = pool.ptrToIdx(component);
-        auto *retrieved_component = pool.idxToPtr(idx);
-        EXPECT_EQ(component, retrieved_component);
-        pool.deallocate(component);
+    auto *component = pool.allocate();
+    ASSERT_NE(component, nullptr);
+    size_t idx = pool.ptrToIdx(component);
+    auto  *retrieved_component = pool.idxToPtr(idx);
+    EXPECT_EQ(component, retrieved_component);
+    pool.deallocate(component);
 }
-
-
-
