@@ -145,17 +145,17 @@ class StaticBox : public GameObject {
 
   public:
     StaticBox(std::shared_ptr<zo::PhysicsSystem2d> physics_system, float width,
-              float height)
+              float height, glm::vec2 pos = {0, 0})
         : GameObject(physics_system) {
 
         physicsObject().setMass(0); // 0 is static object
 
-        glm::vec2                offset = {width / 2, height / 2};
+        // glm::vec2                offset = {width / 2, height / 2};
         std::array<glm::vec2, 4> vertices = {
-            {glm::vec2(-width / 2, -height / 2) + offset,
-             glm::vec2(width / 2, -height / 2) + offset,
-             glm::vec2(width / 2, height / 2) + offset,
-             glm::vec2(-width / 2, height / 2) + offset}};
+            {glm::vec2(-width / 2, -height / 2) + pos,
+             glm::vec2(width / 2, -height / 2) + pos,
+             glm::vec2(width / 2, height / 2) + pos,
+             glm::vec2(-width / 2, height / 2) + pos}};
 
         // create a series of line segment colliders from vertices
         zo::CollisionSystem2d &collision_system =
@@ -184,10 +184,6 @@ class StaticBox : public GameObject {
         vgSetParameterfv(strokePaint(), VG_PAINT_COLOR, 4, &stroke_color[0]);
     }
 
-    // void draw() override {
-    //     std::cout << "StaticBox draw\n";
-    //     GameObject::draw();
-    // }
 
     virtual ~StaticBox() {
         std::cout << "StaticBox destroyed\n";
@@ -254,7 +250,7 @@ int main(int argc, char **argv) {
 
     // create a static box
     std::unique_ptr<StaticBox> box =
-        std::make_unique<StaticBox>(physics_system, width, height/2);
+        std::make_unique<StaticBox>(physics_system, width-20, height-20, glm::vec2{width/2, height/2});
     game_objects.push_back(std::move(box));
 
     std::vector<float> game_obj_lifetime;
@@ -262,27 +258,28 @@ int main(int argc, char **argv) {
 
     // create a row of balls with random velocities
     const float BALL_RADIUS = 5.0f;
-    const float X_OFFSET = BALL_RADIUS + 1.0f;
-    const float Y_POS = 30;
-    glm::vec2   pos = {X_OFFSET, Y_POS};
-    const int   NUM_BALLS_ROW = width / ((BALL_RADIUS + 1.0f) * 2);
-    const int   NUM_ROWS = 10;
+    const float OFFSET = BALL_RADIUS + 5.0f;
+    const float Y_POS = 100;
+    glm::vec2   pos = {OFFSET, Y_POS};
+    const int   NUM_BALLS_ROW = (width - OFFSET) / (OFFSET * 2);
+    const int   NUM_ROWS = 25;
     for (int r = 0; r < NUM_ROWS; r++) {
-        pos += glm::vec2(0, BALL_RADIUS * 2);
+        pos += glm::vec2(0, OFFSET * 2);
+        pos.x = OFFSET;
         for (int i = 0; i < NUM_BALLS_ROW; i++) {
             std::unique_ptr<Ball> ball =
                 std::make_unique<Ball>(physics_system, BALL_RADIUS);
-            pos += glm::vec2(X_OFFSET * 2, 0);
+            pos += glm::vec2(OFFSET * 2, 0);
             ball->physicsObject().setPosition(pos);
             ball->physicsObject().setVelocity(
                 {(float)(rand() % 200) - 100, (float)(rand() % 200) - 100});
             game_objects.push_back(std::move(ball));
-            game_obj_lifetime.push_back(rand() % 5);
+            game_obj_lifetime.push_back(rand() % 30);
         }
     }
 
     // set gravity
-    physics_system->addGlobalForce({0, 120.0f});
+    physics_system->addGlobalForce({0, 160.0f});
 
     float  last_time = glfwGetTime();
     double previous_seconds = glfwGetTime();
@@ -336,12 +333,12 @@ int main(int argc, char **argv) {
         glfwPollEvents();
 
         // remove game objects that have expired
-        for (int i = game_obj_lifetime.size()-1; i >= 1; i--) {
-            if (game_obj_lifetime[i] < 0) {
-                game_objects.erase(game_objects.begin() + i);  
-                game_obj_lifetime.erase(game_obj_lifetime.begin() + i);
-            }
-        }
+        // for (int i = game_obj_lifetime.size()-1; i >= 1; i--) {
+        //     if (game_obj_lifetime[i] < 0) {
+        //         game_objects.erase(game_objects.begin() + i);  
+        //         game_obj_lifetime.erase(game_obj_lifetime.begin() + i);
+        //     }
+        // }
 
 
     } // Check if the ESC key was pressed or the window was closed

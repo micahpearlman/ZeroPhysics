@@ -66,4 +66,21 @@ TEST(MathTest, CircleToCircle) {
     EXPECT_FALSE(result);
 
 }
- 
+
+TEST(MathTest, CircleToThickLineSegment) {
+    circle_2d_t c{glm::vec2(0.0f, 0.0f), 5.0f};
+    thick_line_segment_2d_t ls{line_segment_2d_t{glm::vec2(7.0f, 0.0f), glm::vec2(20.0f, 0.0f)}, 5.0f};
+
+    contact_2d_t contact;
+    bool result = circleToThickLineSegment(c, ls, contact);
+    ASSERT_TRUE(result);
+    EXPECT_EQ(contact.normal, glm::vec2(-1.0f, 0.0f));
+    EXPECT_EQ(contact.point, glm::vec2(-5.0f, 0.0f));
+    EXPECT_NEAR(contact.penetration, 3.0f, 1e-5);
+
+    c = circle_2d_t{glm::vec2(-5.0f, 0.0f), 5.0f};
+    result = circleToThickLineSegment(c, ls, contact);
+    ASSERT_FALSE(result);
+
+
+}

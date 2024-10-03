@@ -37,6 +37,12 @@ struct line_segment_2d_t {
     glm::vec2 end;
 };
 
+/// @brief A thick line segment
+struct thick_line_segment_2d_t {
+    line_segment_2d_t line;
+    float             radius;
+};
+
 struct aabb_2d_t {
     glm::vec2 mn;
     glm::vec2 mx;

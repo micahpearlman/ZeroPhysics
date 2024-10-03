@@ -55,7 +55,20 @@ bool circleToLineSegment(const circle_2d_t &c, const line_segment_2d_t &ls,
     return true;
 }
 
-bool circleToCircle(const circle_2d_t &c1, const circle_2d_t &c2, contact_2d_t &contact) {
+bool circleToThickLineSegment(const circle_2d_t             &c,
+                              const thick_line_segment_2d_t &ls,
+                              contact_2d_t                  &contact) {
+    // calculate the closest point on the line segment to the circle
+    glm::vec2 closest_point = closestPointOnLineSegment(c.center, ls.line);
+
+    // now it is just a circle to circle collision
+    circle_2d_t ls_circle{closest_point, ls.radius};
+    return circleToCircle(c, ls_circle, contact);
+
+}
+
+bool circleToCircle(const circle_2d_t &c1, const circle_2d_t &c2,
+                    contact_2d_t &contact) {
     // calculate squared distance between the two circle centers
     glm::vec2   diff = c1.center - c2.center;
     const float squared_distance = glm::dot(diff, diff);

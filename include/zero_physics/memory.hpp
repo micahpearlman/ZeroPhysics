@@ -232,7 +232,11 @@ template <typename T> class ComponentStore {
         // delete the index from the index to handle map
         _idx_to_handle.erase(remove_idx);
 
-
+        if (remove_idx == last_idx) {
+            // if the element to remove is the last element, just remove it
+            _components.pop_back();
+            return;
+        }
         // update the component array by moving the last element to 
         // the removed element's position
         std::swap(_components[remove_idx], _components[last_idx]);
