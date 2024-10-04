@@ -64,5 +64,8 @@ struct contact_2d_t {
     float     penetration;
 };
 
+// standard epsilon
+constexpr float EPSILON = 1e-5;
+
 } // namespace zo
 #endif // __zoPhysicsTypes_h__

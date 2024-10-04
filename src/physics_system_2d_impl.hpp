@@ -24,6 +24,9 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
 
     void update(float dt) override;
 
+    void setGravity(const glm::vec2 &gravity) override { _gravity = gravity; }
+    glm::vec2 gravity() const override { return _gravity; }
+
     force_handle_2d_t addGlobalForce(const glm::vec2 &f) override;
     void              removeGlobalForce(force_handle_2d_t id) override;
     std::optional<glm::vec2>
@@ -90,6 +93,9 @@ class PhysicsSystem2dImpl : public PhysicsSystem2d {
   private:
     float                                     _last_time_step = 1 / 60.0f;
     int                                       _iterations = 1;
+
+    glm::vec2                                 _gravity = {0, 0};
+
     ComponentStore<glm::vec2>                 _global_forces;
     ComponentStore<PhysicsObject2dImpl::Data> _physics_objects;
 

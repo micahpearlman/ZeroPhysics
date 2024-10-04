@@ -35,6 +35,14 @@ class PhysicsSystem2d {
     /// @param dt The time step to update the physics system by.
     virtual void update(float dt) = 0;
 
+    /// @brief Sets the gravity for the physics system.
+    /// @param gravity glm::vec2 gravity vector
+    virtual void setGravity(const glm::vec2 &gravity) = 0;
+
+    /// @brief Get the gravity for the physics system.
+    /// @return glm::vec2 gravity vector
+    virtual glm::vec2 gravity() const = 0;
+
     /// @brief  Add a global force to the physics system.
     //         This force will be applied to all physics objects.
     /// @param force
