@@ -243,23 +243,6 @@ void PhysicsSystem2dImpl::update(float dt) {
             // velocity
             data.prev_position = data.position - Va_prime;
 
-            // adjust previous position based on impulse and mass
-            // data.prev_position =
-            //     data.position +
-            //     (impulse_vector * (1.0f - (data.mass / total_mass)));
-            // PhysicsObject2dImpl::applyImpulse(data, impulse_vector, dt);
-            float     start_speed = glm::length(velocity_a);
-            glm::vec2 new_velocity = data.position - data.prev_position;
-            float     end_speed = glm::length(new_velocity);
-            // float     vab = glm::length(va);
-            // float     impulse_s = glm::length(impulse);
-
-            std::cout << "OBJ A: " << std::endl;
-            std::cout << "\tstart speed: " << start_speed << std::endl;
-            std::cout << "\tend speed: " << end_speed << std::endl;
-            // std::cout << "vab: " << vab << std::endl;
-            std::cout << "\tJ: " << J << std::endl;
-
             // data.prev_position = data.position; // DEBUG
         }
 
@@ -286,26 +269,6 @@ void PhysicsSystem2dImpl::update(float dt) {
             // so we need to update the previous position to reflect the new
             // velocity
             data.prev_position = data.position - Vb_prime;
-
-
-            float     start_speed = glm::length(velocity_b);
-            glm::vec2 new_velocity = data.position - data.prev_position;
-            float     end_speed = glm::length(new_velocity);
-            // float     vbs = glm::length(vb);
-            // float     impulse_s = glm::length(impulse);
-
-            std::cout << "OBJ B: " << std::endl;
-            std::cout << "\tstart speed: " << start_speed << std::endl;
-            std::cout << "\tend speed: " << end_speed << std::endl;
-            // std::cout << "vbs: " << vbs << std::endl;
-            std::cout << "\tJ: " << J << std::endl;
-
-            // adjust previous position based on impulse and mass (opposite
-            // direction)
-            // data.prev_position =
-            //     data.position -
-            //     (impulse_vector * (1.0f - (data.mass / total_mass)));
-            // PhysicsObject2dImpl::applyImpulse(data, impulse_vector, dt);
 
             // data.prev_position = data.position; // DEBUG
         }

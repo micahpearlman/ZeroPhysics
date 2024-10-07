@@ -354,7 +354,7 @@ int main(int argc, char **argv) {
 
         // if space bar is pressed, shoot a ball
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            game_objects[1]->physicsObject().setVelocity({rand() % 200 - 100, rand() % 200 - 100});
+            game_objects[1]->physicsObject().setVelocity({150, 150});
         }
 
 
