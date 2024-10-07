@@ -111,13 +111,13 @@ int main(int argc, char **argv) {
     std::unique_ptr<zo::PhysicsObject2d> ball_phy_obj_1 =
         physics_system->createPhysicsObject();
     ball_phy_obj_1->setPosition({300, 300});
-    // ball_phy_obj_1->setVelocity({150, 0});
+    ball_phy_obj_1->setVelocity({150, 0});
     ball_phy_obj_1->setMass(MASS_A);
 
     std::unique_ptr<zo::PhysicsObject2d> ball_phy_obj_2 =
         physics_system->createPhysicsObject();
     ball_phy_obj_2->setPosition({600, 300});
-    // ball_phy_obj_2->setVelocity({-150, 0});
+    ball_phy_obj_2->setVelocity({-150, 0});
     ball_phy_obj_2->setMass(MASS_B);
 
     // create a circle collider

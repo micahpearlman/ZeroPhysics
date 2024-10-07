@@ -90,12 +90,12 @@ int main(int argc, char **argv) {
 ```
 ## Examples
 
-### Hello World
+### Simple Example
 
 <img src="./hello-world.gif" width=480>
 
 
-Hello world is a simple example that creates a single "ball" and container box.  The ball is dropped into the container and bounces around.
+Simple example with rendering that creates two balls and a container box.  
 
 To run the example:
 ```bash
