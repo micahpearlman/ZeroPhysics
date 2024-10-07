@@ -10,13 +10,18 @@ Unit tests require gtest to be installed.  On Ubuntu, this can be done with:
 sudo apt-get install libgtest-dev
 ```
 
-On McOS, this can be done with:
+On MacOS, this can be done with:
 
 ```bash
 brew install gtest
 ```
 
-Examples require glfw3 & OpenGl,
+Examples require glfw3, OpenGL.
+
+```bash
+sudo apt-get install libglfw3
+sudo apt-get install libglfw3-dev
+```
 
 ## Build
 
