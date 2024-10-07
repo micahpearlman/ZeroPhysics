@@ -162,7 +162,6 @@ void PhysicsSystem2dImpl::update(float dt) {
             continue;
         }
 
-
         const Collider2dImpl::Data &col_data_a =
             _collision_system->getBaseColliderData(pair.a);
         const Collider2dImpl::Data &col_data_b =
@@ -220,8 +219,7 @@ void PhysicsSystem2dImpl::update(float dt) {
             PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_a.value());
             // move apart by collision normal and penetration depth
-            // data.position += pair.contact.normal *
-            // pair.contact.penetration;
+            data.position += pair.contact.normal * -pair.contact.penetration;
 
             // apply impulse
             // See: https://en.wikipedia.org/wiki/Collision_response
@@ -229,13 +227,14 @@ void PhysicsSystem2dImpl::update(float dt) {
             //  See the calculation of the impulse magnitude above.
             //
             //  Va' = Va - (J / ma) * N
-            //  where: 
+            //  where:
             //      Va' is the new velocity of object A
             //      Va is the current velocity of object A
             //      N is the collision normal
             //      J is the impulse magnitude (see above for calculation)
             //      ma is the mass of object A
-            glm::vec2 Va_prime = velocity_a - (J * inv_mass_a) * pair.contact.normal;
+            glm::vec2 Va_prime =
+                velocity_a - (J * inv_mass_a) * pair.contact.normal;
 
             // update the previous position
             // Remember that the velocity is implicit in the verlet integrator
@@ -250,19 +249,23 @@ void PhysicsSystem2dImpl::update(float dt) {
             PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_b.value());
 
+            data.position += pair.contact.normal * pair.contact.penetration;
+
+
             // apply impulse
             // See: https://en.wikipedia.org/wiki/Collision_response
             //
             //  See the calculation of the impulse magnitude above.
             //
             //  Vb' = Vb + (J / ma) * N
-            //  where: 
+            //  where:
             //      Vb' is the new velocity of object B
             //      Vb is the current velocity of object B
             //      N is the collision normal
             //      J is the impulse magnitude (see above for calculation)
             //      ma is the mass of object A
-            glm::vec2 Vb_prime = velocity_b + (J * inv_mass_b) * pair.contact.normal;
+            glm::vec2 Vb_prime =
+                velocity_b + (J * inv_mass_b) * pair.contact.normal;
 
             // update the previous position
             // Remember that the velocity is implicit in the verlet integrator

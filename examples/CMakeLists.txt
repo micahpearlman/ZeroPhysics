@@ -20,6 +20,21 @@ endif(APPLE)
 add_executable(hello_world hello_world.cpp)
 target_link_libraries(hello_world 
     zero_physics
+    ${PLATFORM_LIBS}
+    ${CMAKE_DL_LIBS}
+    pthread
+    )
+target_include_directories(hello_world 
+    PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/MonkVG/include
+    ${GLFW_INCLUDE_DIRS}
+    zero_physics
+    )
+
+## Simple
+add_executable(simple simple.cpp)
+target_link_libraries(simple 
+    zero_physics
     monkvg
     ${GLU_LIBRARIES} # Required by MonkVG
     glfw   
@@ -28,7 +43,7 @@ target_link_libraries(hello_world
     ${CMAKE_DL_LIBS}
     pthread
     )
-target_include_directories(hello_world 
+target_include_directories(simple 
     PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/MonkVG/include
     ${GLFW_INCLUDE_DIRS}
