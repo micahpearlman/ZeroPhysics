@@ -246,7 +246,7 @@ int main(int argc, char **argv) {
     constexpr int MAX_PHYSICS_OBJECTS = 1000 * 10;
     ;
     std::shared_ptr<zo::PhysicsSystem2d> physics_system =
-        zo::PhysicsSystem2d::create(MAX_PHYSICS_OBJECTS, 1, zo::BroadPhaseType::GRID);
+        zo::PhysicsSystem2d::create(MAX_PHYSICS_OBJECTS, 4, zo::BroadPhaseType::GRID);
 
     std::vector<std::unique_ptr<GameObject>> game_objects;
 
@@ -259,12 +259,12 @@ int main(int argc, char **argv) {
     game_obj_lifetime.push_back(0); // static box
 
     /// create a ball to shoot
-    std::unique_ptr<Ball> ball =
+    std::unique_ptr<Ball> blaster_ball =
         std::make_unique<Ball>(physics_system, 30.0f);
-    ball->physicsObject().setPosition({150, height-150});
-    ball->physicsObject().setMass(10.0f);
-    ball->physicsObject().setVelocity({500, -500});
-    game_objects.push_back(std::move(ball));
+    blaster_ball->physicsObject().setPosition({50, 50});
+    blaster_ball->physicsObject().setMass(1000.0f);
+    blaster_ball->physicsObject().setVelocity({0, 0});
+    game_objects.push_back(std::move(blaster_ball));
     game_obj_lifetime.push_back(30);
 
 
@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
     }
 
     // set gravity
-    physics_system->addGlobalForce({0, 160.0f});
+    // physics_system->setGravity({0, 160.0f});
 
     float  last_time = glfwGetTime();
     double previous_seconds = glfwGetTime();
@@ -351,6 +351,11 @@ int main(int argc, char **argv) {
         //         game_obj_lifetime.erase(game_obj_lifetime.begin() + i);
         //     }
         // }
+
+        // if space bar is pressed, shoot a ball
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+            game_objects[1]->physicsObject().setVelocity({rand() % 200 - 100, rand() % 200 - 100});
+        }
 
 
     } // Check if the ESC key was pressed or the window was closed

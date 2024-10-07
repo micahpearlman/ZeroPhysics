@@ -25,13 +25,14 @@ class PhysicsObject2dImpl : public PhysicsObject2d {
   public:
     /// @brief The data for a physics object
     struct alignas(std::max_align_t) Data {
-        glm::vec2 position = {0, 0};
-        glm::vec2 prev_position = {0, 0};
-        glm::vec2 acceleration = {0, 0};
-        glm::vec2 force = {0, 0};
-        collider_handle_2d_t collider = {uint16_t(ColliderType::MAX), 0xfffffff};
-        uint32_t collider_vertex = 0;
-        float     mass = 1;
+        glm::vec2            position = {0, 0};
+        glm::vec2            prev_position = {0, 0};
+        glm::vec2            acceleration = {0, 0};
+        glm::vec2            force = {0, 0};
+        collider_handle_2d_t collider = {uint16_t(ColliderType::MAX),
+                                         0xfffffff};
+        uint32_t             collider_vertex = 0;
+        float                mass = 1;
     };
 
   public:
@@ -56,8 +57,19 @@ class PhysicsObject2dImpl : public PhysicsObject2d {
 
     phy_obj_handle_2d_t handle() const override;
 
-    PhysicsObject2dImpl::Data       &data();
+    /// @brief Get the underlying physics object data
+    /// @return PhysicsObject2dImpl::Data& the physics object data
+    PhysicsObject2dImpl::Data &data();
+
+    /// @brief Get the underlying physics object data
+    /// @return const PhysicsObject2dImpl::Data& the physics object data
     const PhysicsObject2dImpl::Data &data() const;
+
+    /// @brief Apply an impulse to the physics object
+    /// @param impulse the impulse to apply
+    /// @param time_step the time step
+    static void applyImpulse(PhysicsObject2dImpl::Data &data,
+                             const glm::vec2 &impulse, const float time_step);
 
   private:
     PhysicsSystem2dImpl &_sys;

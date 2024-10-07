@@ -70,7 +70,7 @@ bool circleToThickLineSegment(const circle_2d_t             &c,
 bool circleToCircle(const circle_2d_t &c1, const circle_2d_t &c2,
                     contact_2d_t &contact) {
     // calculate squared distance between the two circle centers
-    glm::vec2   diff = c1.center - c2.center;
+    glm::vec2   diff = c2.center - c1.center;
     const float squared_distance = glm::dot(diff, diff);
 
     // if squared distance is less than or equal to the sum of the radii squared

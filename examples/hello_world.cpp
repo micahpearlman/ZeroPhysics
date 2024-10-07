@@ -37,7 +37,6 @@
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
 
-
 int main(int argc, char **argv) {
     std::cout << "Hello, MonkVG!\n";
     // Initialise GLFW
@@ -90,7 +89,6 @@ int main(int argc, char **argv) {
     VGfloat stroke_color[4] = {0.0f, 0.0f, 1.0f, 1.0f};
     vgSetParameterfv(stroke_paint, VG_PAINT_COLOR, 4, &stroke_color[0]);
 
-
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
@@ -101,92 +99,96 @@ int main(int argc, char **argv) {
 
     /// initialize the physics system
     std::shared_ptr<zo::PhysicsSystem2d> physics_system =
-        zo::PhysicsSystem2d::create(1024, 1, zo::BroadPhaseType::GRID);
+        zo::PhysicsSystem2d::create(1024, 1, zo::BroadPhaseType::NAIVE);
 
+    constexpr float MASS_A = 1;
+    constexpr float MASS_B = 1;
+    constexpr float RADIUS_A = MASS_A * 10;
+    constexpr float RADIUS_B = MASS_B * 10;
+    constexpr float WALL_THICKNESS = 5.0f;
+// static_assert(!"how do i figure out what the collision normal is?");
     // create a physics object
     std::unique_ptr<zo::PhysicsObject2d> ball_phy_obj_1 =
         physics_system->createPhysicsObject();
     ball_phy_obj_1->setPosition({300, 300});
     ball_phy_obj_1->setVelocity({150, 0});
+    ball_phy_obj_1->setMass(MASS_A);
 
     std::unique_ptr<zo::PhysicsObject2d> ball_phy_obj_2 =
         physics_system->createPhysicsObject();
     ball_phy_obj_2->setPosition({600, 300});
     ball_phy_obj_2->setVelocity({-150, 0});
+    ball_phy_obj_2->setMass(MASS_B);
 
     // create a circle collider
     zo::CollisionSystem2d &collision_system = physics_system->collisionSystem();
 
     std::unique_ptr<zo::CircleCollider2d> circle_collider_1 =
         collision_system.createCollider<zo::CircleCollider2d>();
-    circle_collider_1->setRadius(15.0f);
+    circle_collider_1->setRadius(RADIUS_A);
+    circle_collider_1->setRestitution(1.0f);
     ball_phy_obj_1->setCollider(*circle_collider_1, 0);
 
     std::unique_ptr<zo::CircleCollider2d> circle_collider_2 =
         collision_system.createCollider<zo::CircleCollider2d>();
-    circle_collider_2->setRadius(15.0f);
+    circle_collider_2->setRadius(RADIUS_B);
+    circle_collider_2->setRestitution(1.0f);
     ball_phy_obj_2->setCollider(*circle_collider_2, 0);
 
     // add some gravity
-    physics_system->addGlobalForce({0, 120.0f});
+    physics_system->setGravity({0, 120.0f});
 
     // create a small vg circle to represent the physics object
-    VGPath circle_1 = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
-                                 0, 0, 0, VG_PATH_CAPABILITY_ALL);
-    vguEllipse(circle_1, 0.0f, 0.0f, 30.0f, 30.0f);
+    VGPath circle_1 = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F,
+                                   1, 0, 0, 0, VG_PATH_CAPABILITY_ALL);
+    vguEllipse(circle_1, 0.0f, 0.0f, RADIUS_A*2, RADIUS_A*2);
 
-    VGPath circle_2 = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1,
-                                 0, 0, 0, VG_PATH_CAPABILITY_ALL);
-    vguEllipse(circle_2, 0.0f, 0.0f, 30.0f, 30.0f);
+    VGPath circle_2 = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F,
+                                   1, 0, 0, 0, VG_PATH_CAPABILITY_ALL);
+    vguEllipse(circle_2, 0.0f, 0.0f, RADIUS_B*2, RADIUS_B*2);
 
     /// walls and floor segments
-    std::array<glm::vec2, 4> segments = {{
-        glm::vec2{200, 100},
-        glm::vec2{200, 500},
-        glm::vec2{800, 500},
-        glm::vec2{800, 100}
-    }};
-
-    const float WALL_THICKNESS = 5.0f;
+    std::array<glm::vec2, 4> segments = {
+        {glm::vec2{200, 100}, glm::vec2{200, 500}, glm::vec2{800, 500},
+         glm::vec2{800, 100}}};
+    
     // left wall collider
+    zo::thick_line_segment_2d_t left_wall_segment{segments[0], segments[1],
+                                                  WALL_THICKNESS};
     std::unique_ptr<zo::LineCollider2d> left_wall_col =
         collision_system.createCollider<zo::LineCollider2d>();
-    zo::thick_line_segment_2d_t left_wall_segment{segments[0], segments[1], WALL_THICKNESS};
     left_wall_col->setLine(left_wall_segment);
 
-
     // floor collider
+    zo::thick_line_segment_2d_t floor_segment = {segments[1], segments[2],
+                                                 WALL_THICKNESS};
     std::unique_ptr<zo::LineCollider2d> floor_col =
         collision_system.createCollider<zo::LineCollider2d>();
-
-    zo::thick_line_segment_2d_t floor_segment = {segments[1], segments[2], WALL_THICKNESS};
     floor_col->setLine(floor_segment);
 
     // right wall collider
+    zo::thick_line_segment_2d_t right_wall_segment = {segments[2], segments[3],
+                                                      WALL_THICKNESS};
     std::unique_ptr<zo::LineCollider2d> right_wall_col =
         collision_system.createCollider<zo::LineCollider2d>();
-    zo::thick_line_segment_2d_t right_wall_segment = {segments[2], segments[3], WALL_THICKNESS};
     right_wall_col->setLine(right_wall_segment);
-
 
     // create a floor path
     VGPath box_path = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F,
                                    1, 0, 0, 0, VG_PATH_CAPABILITY_ALL);
     vguPolygon(box_path, (VGfloat *)&segments, segments.size(), VG_FALSE);
 
-
     // velocity vector display
-    VGPath velocity_vector_1 = vgCreatePath(VG_PATH_FORMAT_STANDARD,
-                                          VG_PATH_DATATYPE_F, 1, 0, 0, 0,
-                                          VG_PATH_CAPABILITY_ALL);
-    VGPath velocity_vector_2 = vgCreatePath(VG_PATH_FORMAT_STANDARD,
-                                          VG_PATH_DATATYPE_F, 1, 0, 0, 0,
-                                          VG_PATH_CAPABILITY_ALL);
+    VGPath velocity_vector_1 =
+        vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1, 0, 0, 0,
+                     VG_PATH_CAPABILITY_ALL);
+    VGPath velocity_vector_2 =
+        vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1, 0, 0, 0,
+                     VG_PATH_CAPABILITY_ALL);
 
     VGPaint velocity_paint = vgCreatePaint();
     VGfloat velocity_color[4] = {1.0f, 0.0f, 0.0f, 1.0f};
     vgSetParameterfv(velocity_paint, VG_PAINT_COLOR, 4, &velocity_color[0]);
-
 
     float  last_time = glfwGetTime();
     double previous_seconds = glfwGetTime();
@@ -229,7 +231,7 @@ int main(int argc, char **argv) {
         vgDrawPath(circle_1, VG_FILL_PATH | VG_STROKE_PATH);
 
         // draw velocity vector for the balls
-        glm::vec2 vel = ball_phy_obj_1->velocity() * -20.0f;
+        glm::vec2 vel = ball_phy_obj_1->velocity() * 20.0f;
         vgSetf(VG_STROKE_LINE_WIDTH, 2.0f);
         vgSetPaint(velocity_paint, VG_STROKE_PATH);
         vgLoadIdentity();
@@ -239,7 +241,6 @@ int main(int argc, char **argv) {
         VGfloat coords[] = {0, 0, vel.x, vel.y};
         vgAppendPathData(velocity_vector_1, 2, commands, coords);
         vgDrawPath(velocity_vector_1, VG_STROKE_PATH);
-
 
         /// draw ball 2
         vgLoadIdentity();
@@ -252,8 +253,8 @@ int main(int argc, char **argv) {
         // draw the path with fill and stroke
         vgDrawPath(circle_2, VG_FILL_PATH | VG_STROKE_PATH);
 
-
-        vel = ball_phy_obj_2->velocity() * -20.0f;
+        // draw velocity vector for the balls
+        vel = ball_phy_obj_2->velocity() * 20.0f;
         vgSetf(VG_STROKE_LINE_WIDTH, 2.0f);
         vgSetPaint(velocity_paint, VG_STROKE_PATH);
         vgLoadIdentity();
@@ -263,7 +264,6 @@ int main(int argc, char **argv) {
         VGfloat coords_2[] = {0, 0, vel.x, vel.y};
         vgAppendPathData(velocity_vector_2, 2, commands_2, coords_2);
         vgDrawPath(velocity_vector_2, VG_STROKE_PATH);
-
 
         // pop the ortho camera
         vgPopOrthoCamera();

@@ -44,7 +44,7 @@ void PhysicsObject2dImpl::setVelocity(const glm::vec2 &v) {
 glm::vec2 PhysicsObject2dImpl::velocity() const {
     // remember that velocity isn't explicit in verlet so we will
     // calculate it
-    return data().prev_position - data().position;
+    return data().position - data().prev_position;
 }
 
 void PhysicsObject2dImpl::setAcceleration(const glm::vec2 &a) {
@@ -87,6 +87,28 @@ PhysicsObject2dImpl::Data &PhysicsObject2dImpl::data() {
 
 const PhysicsObject2dImpl::Data &PhysicsObject2dImpl::data() const {
     return _sys.physicsObjectData(_hndl);
+}
+
+void PhysicsObject2dImpl::applyImpulse(PhysicsObject2dImpl::Data &data, const glm::vec2 &impulse, const float time_step) {
+    // ignore static objects
+    if (data.mass <= 0) {
+        return;
+    }
+    // derive velocity.  This is a verlet integrator so velocity is
+    // implicit so we will calculate it from the previous position to the
+    // current position
+    glm::vec2 velocity = (data.prev_position - data.position) / time_step;
+
+    // calculate the impulse preserving momentum
+    glm::vec2 delta_velocity = impulse / data.mass;
+
+    // new velocity
+    glm::vec2 new_velocity = velocity + delta_velocity;
+
+    // update the previous position to reflect the new velocity
+    // again this is a verlet integrator so we set the previous position
+    data.prev_position = data.position - new_velocity * time_step;
+
 }
 
 } // namespace zo

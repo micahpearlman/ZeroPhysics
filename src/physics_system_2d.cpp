@@ -22,8 +22,9 @@ PhysicsSystem2d::create(size_t max_num_objects, int iterations,
     return std::shared_ptr<PhysicsSystem2d>(impl);
 }
 
-PhysicsSystem2dImpl::PhysicsSystem2dImpl(size_t max_number_object,
-                                         float  iterations, BroadPhaseType broad_phase_type)
+PhysicsSystem2dImpl::PhysicsSystem2dImpl(size_t         max_number_object,
+                                         float          iterations,
+                                         BroadPhaseType broad_phase_type)
     : _iterations(iterations) {
     // create the collision system
     // HARDWIRED: the collision system colliders is 3 times the number of
@@ -49,7 +50,7 @@ void PhysicsSystem2dImpl::update(float dt) {
             }
             glm::vec2 force = data.force;
             force += global_force_sum;
-            glm::vec2 acceleration = force / data.mass;
+            glm::vec2 acceleration = (force / data.mass) + gravity();
             glm::vec2 new_position = data.position +
                                      (data.position - data.prev_position) +
                                      acceleration * iter_dt * iter_dt;
@@ -73,8 +74,8 @@ void PhysicsSystem2dImpl::update(float dt) {
                                        glm::vec2{collider.circle.radius,
                                                  collider.circle.radius};
                     collider.aabb.mx = collider.circle.center +
-                                        glm::vec2{collider.circle.radius,
-                                                     collider.circle.radius};
+                                       glm::vec2{collider.circle.radius,
+                                                 collider.circle.radius};
                 } else if (data.collider.type == uint8_t(ColliderType::LINE)) {
                     auto &collider =
                         _collision_system
@@ -87,10 +88,14 @@ void PhysicsSystem2dImpl::update(float dt) {
                     }
 
                     // update the aabb
-                    const glm::vec2 thickness = glm::vec2{collider.line.radius, collider.line.radius};
-                    collider.aabb.mn = glm::min(collider.line.line.start-thickness, collider.line.line.end+thickness);
-                    collider.aabb.mx = glm::max(collider.line.line.start-thickness, collider.line.line.end+thickness);
-                    
+                    const glm::vec2 thickness =
+                        glm::vec2{collider.line.radius, collider.line.radius};
+                    collider.aabb.mn =
+                        glm::min(collider.line.line.start - thickness,
+                                 collider.line.line.end + thickness);
+                    collider.aabb.mx =
+                        glm::max(collider.line.line.start - thickness,
+                                 collider.line.line.end + thickness);
                 }
             }
         }
@@ -103,34 +108,60 @@ void PhysicsSystem2dImpl::update(float dt) {
     for (const CollisionPair &pair : _collision_system->collisionPairs()) {
         auto phy_obj_a = physicsObjectMappedToCollider(pair.a);
         auto phy_obj_b = physicsObjectMappedToCollider(pair.b);
+
+        // if both objects do not have physics objects then skip
         if (phy_obj_a.has_value() == false && phy_obj_b.has_value() == false) {
             continue;
         }
-        float     total_mass = 0;
+
+        float     inv_mass_a = 0;
+        float     inv_mass_b = 0;
         glm::vec2 velocity_a(0);
         glm::vec2 velocity_b(0);
+        bool      is_static_a = false;
+        bool      is_static_b = false;
 
         if (phy_obj_a.has_value()) {
             const PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_a.value());
+
+            // not static
             if (data.mass > 0) {
-                total_mass += data.mass;
-                velocity_a = data.prev_position - data.position;
+                velocity_a = data.position - data.prev_position;
+                inv_mass_a = 1.0f / data.mass;
+            } else {
+                inv_mass_a = 0;
+                is_static_a = true;
             }
+        } else {
+            // static collision only object so make it's mass infinite
+            inv_mass_a = 0;
+            is_static_a = true;
         }
+
         if (phy_obj_b.has_value()) {
             const PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_b.value());
+
+            // check if the object is static
             if (data.mass > 0) {
-                total_mass += data.mass;
-                velocity_b = data.prev_position - data.position;
+                inv_mass_b = 1.0f / data.mass;
+                velocity_b = data.position - data.prev_position;
+            } else {
+                // static object so make it's mass infinite
+                inv_mass_b = 0;
+                is_static_b = true;
             }
+        } else {
+            inv_mass_b = 0;
+            is_static_b = true;
         }
 
         // if both objects are static then skip
-        if (total_mass <= 0) {
+        if (is_static_a && is_static_b) {
             continue;
         }
+
 
         const Collider2dImpl::Data &col_data_a =
             _collision_system->getBaseColliderData(pair.a);
@@ -138,56 +169,145 @@ void PhysicsSystem2dImpl::update(float dt) {
             _collision_system->getBaseColliderData(pair.b);
 
         // calculate the relative velocities along the collision normal
-        float rel_velo_along_norm =
-            glm::dot(velocity_a - velocity_b, pair.contact.normal);
+        // Vn = (Vb - Va) . N
+        // See full impulse calculation below.
+        const float Vn = glm::dot(velocity_b - velocity_a, pair.contact.normal);
 
         // if not already separating then resolve the collision by moving apart
         // with an impulse.
-        glm::vec2 impulse_vector = glm::vec2(0);
-        if (rel_velo_along_norm > 0) {
+        float J = 0;
+        if (Vn < 0) {
+
+            // See: https://en.wikipedia.org/wiki/Collision_response
+            // See: https://en.wikipedia.org/wiki/Coefficient_of_restitution
+            // See: https://en.wikipedia.org/wiki/Impulse_(physics)
+            // See: https://en.wikipedia.org/wiki/Inelastic_collision
+            // https://physics.stackexchange.com/questions/598480/calculating-new-velocities-of-n-dimensional-particles-after-collision
+            //
+            // calculate the inelastic (i.e., with restitution) impulse
+            // magnitude:
+            //
+            //   Relative velocity along the collision normal:
+            //     Vn = (Vb - Va) . N
+            //
+            //          -(e + 1) * Vn
+            // J = -------------------------
+            //            1/ma + 1/mb
+            //
+            // where:
+            //   e is the coefficient of restitution
+            //   Vn is the relative velocity along the collision normal
+            //   Va is the velocity of object A
+            //   Vb is the velocity of object B
+            //   ma is the mass of object A
+            //   mb is the mass of object B
+            //   J is the impulse magnitude
 
             // calculate the average of the two restitution values
-            float restitution =
+            const float e =
                 0.5f * (col_data_a.restitution + col_data_b.restitution);
 
-            // calculate impulse vector
-            glm::vec2 rel_velo = velocity_a - velocity_b;
-            impulse_vector = glm::reflect(rel_velo, pair.contact.normal);
-            impulse_vector *= restitution;
+            // calculate impulse magnitude
+            J = -(e + 1.0) * Vn / (inv_mass_a + inv_mass_b);
+
+        } else {
+            // objects are already separating
+            continue;
         }
 
         // move apart
-        if (phy_obj_a.has_value()) {
+        if (is_static_a == false && phy_obj_a.has_value()) {
             PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_a.value());
-            if (data.mass > 0) {
-                // move apart by collision normal and penetration depth
-                data.position += pair.contact.normal * pair.contact.penetration;
+            // move apart by collision normal and penetration depth
+            // data.position += pair.contact.normal *
+            // pair.contact.penetration;
 
-                // adjust previous position based on impulse and mass
-                data.prev_position =
-                    data.position + (impulse_vector * (data.mass / total_mass));
+            // apply impulse
+            // See: https://en.wikipedia.org/wiki/Collision_response
+            //
+            //  See the calculation of the impulse magnitude above.
+            //
+            //  Va' = Va - (J / ma) * N
+            //  where: 
+            //      Va' is the new velocity of object A
+            //      Va is the current velocity of object A
+            //      N is the collision normal
+            //      J is the impulse magnitude (see above for calculation)
+            //      ma is the mass of object A
+            glm::vec2 Va_prime = velocity_a - (J * inv_mass_a) * pair.contact.normal;
 
-                // data.prev_position = data.position;  // DEBUG
-            }
+            // update the previous position
+            // Remember that the velocity is implicit in the verlet integrator
+            // so we need to update the previous position to reflect the new
+            // velocity
+            data.prev_position = data.position - Va_prime;
+
+            // adjust previous position based on impulse and mass
+            // data.prev_position =
+            //     data.position +
+            //     (impulse_vector * (1.0f - (data.mass / total_mass)));
+            // PhysicsObject2dImpl::applyImpulse(data, impulse_vector, dt);
+            float     start_speed = glm::length(velocity_a);
+            glm::vec2 new_velocity = data.position - data.prev_position;
+            float     end_speed = glm::length(new_velocity);
+            // float     vab = glm::length(va);
+            // float     impulse_s = glm::length(impulse);
+
+            std::cout << "OBJ A: " << std::endl;
+            std::cout << "\tstart speed: " << start_speed << std::endl;
+            std::cout << "\tend speed: " << end_speed << std::endl;
+            // std::cout << "vab: " << vab << std::endl;
+            std::cout << "\tJ: " << J << std::endl;
+
+            // data.prev_position = data.position; // DEBUG
         }
 
-        if (phy_obj_b.has_value()) {
+        if (is_static_b == false && phy_obj_b.has_value()) {
             PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_b.value());
 
-            if (data.mass > 0) {
-                // move apart by collision normal and penetration depth
-                // (opposite direction)
-                data.position +=
-                    pair.contact.normal * -pair.contact.penetration;
+            // apply impulse
+            // See: https://en.wikipedia.org/wiki/Collision_response
+            //
+            //  See the calculation of the impulse magnitude above.
+            //
+            //  Vb' = Vb + (J / ma) * N
+            //  where: 
+            //      Vb' is the new velocity of object B
+            //      Vb is the current velocity of object B
+            //      N is the collision normal
+            //      J is the impulse magnitude (see above for calculation)
+            //      ma is the mass of object A
+            glm::vec2 Vb_prime = velocity_b + (J * inv_mass_b) * pair.contact.normal;
 
-                // adjust previous position based on impulse and mass (opposite
-                // direction)
-                data.prev_position =
-                    data.position - (impulse_vector * (data.mass / total_mass));
-                // data.prev_position = data.position; // DEBUG
-            }
+            // update the previous position
+            // Remember that the velocity is implicit in the verlet integrator
+            // so we need to update the previous position to reflect the new
+            // velocity
+            data.prev_position = data.position - Vb_prime;
+
+
+            float     start_speed = glm::length(velocity_b);
+            glm::vec2 new_velocity = data.position - data.prev_position;
+            float     end_speed = glm::length(new_velocity);
+            // float     vbs = glm::length(vb);
+            // float     impulse_s = glm::length(impulse);
+
+            std::cout << "OBJ B: " << std::endl;
+            std::cout << "\tstart speed: " << start_speed << std::endl;
+            std::cout << "\tend speed: " << end_speed << std::endl;
+            // std::cout << "vbs: " << vbs << std::endl;
+            std::cout << "\tJ: " << J << std::endl;
+
+            // adjust previous position based on impulse and mass (opposite
+            // direction)
+            // data.prev_position =
+            //     data.position -
+            //     (impulse_vector * (1.0f - (data.mass / total_mass)));
+            // PhysicsObject2dImpl::applyImpulse(data, impulse_vector, dt);
+
+            // data.prev_position = data.position; // DEBUG
         }
     }
 }
