@@ -397,19 +397,12 @@ int main(int argc, char **argv) {
         // calculate the frame rate
         double current_seconds = glfwGetTime();
         double elapsed_seconds = current_seconds - previous_seconds;        
-        if (elapsed_seconds > 0.25) {
+        if (elapsed_seconds > 0.25) { // sample fps every 0.25 seconds
             previous_seconds = current_seconds;
             fps = (double)frame_count / elapsed_seconds;
             ms_per_frame = 1000.0 / fps;
 
-            // std::stringstream ss;
-            // ss << "Zero Physics Hello World - " << std::fixed
-            //    << std::setprecision(2) << ms_per_frame << " ms/frame ("
-            //    << std::setprecision(1) << fps << " FPS)";
-            // std::string title = ss.str();
-            // glfwSetWindowTitle(window, title.c_str());
             frame_count = 0;
-            // std::cout << ms_per_frame << " ms/frame (" << fps << " FPS)\n";
         }
         frame_count++;
 
