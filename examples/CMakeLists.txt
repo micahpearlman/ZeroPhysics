@@ -1,5 +1,6 @@
 # Build example applications
 
+## MonkVG for rendering
 set(MKVG_DO_EXAMPLES OFF)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/MonkVG ${CMAKE_CURRENT_BINARY_DIR}/MonkVG)
 
@@ -26,7 +27,6 @@ target_link_libraries(hello_world
     )
 target_include_directories(hello_world 
     PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/MonkVG/include
     ${GLFW_INCLUDE_DIRS}
     zero_physics
     )
@@ -45,7 +45,6 @@ target_link_libraries(simple
     )
 target_include_directories(simple 
     PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/MonkVG/include
     ${GLFW_INCLUDE_DIRS}
     zero_physics
     )
@@ -64,7 +63,8 @@ target_link_libraries(stress
     )
 target_include_directories(stress 
     PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/MonkVG/include
     ${GLFW_INCLUDE_DIRS}
     zero_physics
+    # Use MonkVG's stb
+    ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/MonkVG/thirdparty/stb
     )

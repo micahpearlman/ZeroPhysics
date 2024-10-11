@@ -48,9 +48,12 @@ void PhysicsSystem2dImpl::update(float dt) {
             if (data.mass <= 0) { // static object
                 continue;
             }
+
+            /// Do the Verlet integration:
+            /// x(t+dt) = x(t) + (x(t) - x(t-dt)) + a(t) * dt^2
             glm::vec2 force = data.force;
             force += global_force_sum;
-            glm::vec2 acceleration = (force / data.mass) + gravity();
+            glm::vec2 acceleration = (force / data.mass) + gravity();            
             glm::vec2 new_position = data.position +
                                      (data.position - data.prev_position) +
                                      acceleration * iter_dt * iter_dt;
@@ -219,7 +222,7 @@ void PhysicsSystem2dImpl::update(float dt) {
             PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_a.value());
             // move apart by collision normal and penetration depth
-            data.position += pair.contact.normal * -pair.contact.penetration;
+            // data.position += pair.contact.normal * (-pair.contact.penetration*0.5f);
 
             // apply impulse
             // See: https://en.wikipedia.org/wiki/Collision_response
@@ -249,7 +252,7 @@ void PhysicsSystem2dImpl::update(float dt) {
             PhysicsObject2dImpl::Data &data =
                 physicsObjectData(phy_obj_b.value());
 
-            data.position += pair.contact.normal * pair.contact.penetration;
+            // data.position += pair.contact.normal * (pair.contact.penetration * 0.5f);
 
 
             // apply impulse

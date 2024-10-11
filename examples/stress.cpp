@@ -16,6 +16,7 @@
 // MonkVG OpenVG interface
 #include <MonkVG/openvg.h>
 #include <MonkVG/vgext.h>
+#include <MonkVG/vgu.h>
 
 // OpenGL window creation libraries
 #if defined(__APPLE__)
@@ -27,15 +28,21 @@
 #include <GLFW/glfw3.h>
 #endif
 
+// STB image loader
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 // System
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <string>
 #include <iomanip>
 #include <memory>
 #include <vector>
 #include <array>
 #include <random>
+#include <filesystem>
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
@@ -97,7 +104,8 @@ class GameObject {
     }
 
     virtual ~GameObject() {
-        // std::cout << "\tGameObject destroyed: " << _phy_obj->handle() << "\n";
+        // std::cout << "\tGameObject destroyed: " << _phy_obj->handle() <<
+        // "\n";
         vgDestroyPath(_path);
         vgDestroyPaint(_fill_paint);
         vgDestroyPaint(_stroke_paint);
@@ -119,7 +127,7 @@ class Ball : public GameObject {
         physicsObject().setCollider(*circle_collider, 0);
 
         // create a circle path
-        vguEllipse(path(), 0.0f, 0.0f, radius*2, radius*2);
+        vguEllipse(path(), 0.0f, 0.0f, radius * 2, radius * 2);
 
         // generate random fill color
         VGfloat fill_color[4] = {(float)rand() / (float)RAND_MAX,
@@ -133,8 +141,6 @@ class Ball : public GameObject {
                                    (float)rand() / (float)RAND_MAX, 1.0f};
         vgSetParameterfv(strokePaint(), VG_PAINT_COLOR, 4, &stroke_color[0]);
     }
-
-
 
     virtual ~Ball() {
         // std::cout << "Ball destroyed\n";
@@ -165,8 +171,8 @@ class StaticBox : public GameObject {
         for (int i = 0; i < 4; i++) {
             std::unique_ptr<zo::LineCollider2d> line_collider =
                 collision_system.createCollider<zo::LineCollider2d>();
-            zo::thick_line_segment_2d_t line_segment = {vertices[i],
-                                                  vertices[(i + 1) % 4], 5.0f};
+            zo::thick_line_segment_2d_t line_segment = {
+                vertices[i], vertices[(i + 1) % 4], 5.0f};
             line_collider->setLine(line_segment);
             _line_colliders.push_back(std::move(line_collider));
         }
@@ -186,10 +192,68 @@ class StaticBox : public GameObject {
         vgSetParameterfv(strokePaint(), VG_PAINT_COLOR, 4, &stroke_color[0]);
     }
 
+    virtual ~StaticBox() { std::cout << "StaticBox destroyed\n"; }
+};
 
-    virtual ~StaticBox() {
-        std::cout << "StaticBox destroyed\n";
+class TextRenderer {
+  public:
+    TextRenderer(const std::string &bmfont_fnt_file,
+                 const std::string &bmfont_image_file) {
+
+        // get the working directory
+        std::cout << "Working directory: " << std::filesystem::current_path() << "\n";
+        /// setup openvg text rendering
+        // open the bmFont file and read into string
+        std::ifstream     bmfont_file(bmfont_fnt_file);
+        if (!bmfont_file.is_open()) {
+            throw std::runtime_error("Failed to open font file. make sure you're working directory is set to the ./examples directory");
+        }
+        std::stringstream ss;
+        ss << bmfont_file.rdbuf();
+
+        // open the bmFont image file
+        // open bitmap font imageı
+        int            bmp_fnt_width = 0;
+        int            bmp_fnt_height = 0;
+        int            bmp_fnt_channels = 0;
+        unsigned char *bmp_fnt_data =
+            stbi_load(bmfont_image_file.c_str(), &bmp_fnt_width, &bmp_fnt_height,
+                      &bmp_fnt_channels, 0);
+        if (bmp_fnt_data == nullptr) {
+            throw std::runtime_error("Failed to load font image. make sure you're working directory is set to the ./examples directory");
+        }
+        VGImage bmp_fnt_image =
+            vgCreateImage(VG_sRGBA_8888, bmp_fnt_width, bmp_fnt_height,
+                          VG_IMAGE_QUALITY_BETTER);
+        vgImageSubData(bmp_fnt_image, bmp_fnt_data, bmp_fnt_width * 4,
+                       VG_sRGBA_8888, 0, 0, bmp_fnt_width, bmp_fnt_height);
+        stbi_image_free(bmp_fnt_data);
+
+        _font = vguCreateFontFromBmFnt(ss.str().c_str(), bmp_fnt_image);
+
+        // create fill paint
+        _fill = vgCreatePaint();
+        vgSetParameteri(_fill, VG_PAINT_TYPE, VG_PAINT_TYPE_COLOR);
+        VGfloat color[4] = {0.8f, 0.8f, 0.8f, 1.0f};
+        vgSetParameterfv(_fill, VG_PAINT_COLOR, 4, color);
     }
+
+    void drawText(const std::string &text, float x, float y, float scale = 1.0f) {
+        vgSeti(VG_MATRIX_MODE, VG_MATRIX_GLYPH_USER_TO_SURFACE);
+        vgLoadIdentity();
+        VGfloat glyphOrigin[2] = {0, 0};
+        vgSetfv(VG_GLYPH_ORIGIN, 2, glyphOrigin);
+        vgScale(scale, scale);
+        vgTranslate(x, y);
+
+        vgSeti(VG_IMAGE_MODE, VG_DRAW_IMAGE_MULTIPLY);
+        vgSetPaint(_fill, VG_FILL_PATH);
+        vguDrawText(_font, text.c_str(), NULL, NULL);
+    }
+
+  private:
+    VGFont _font;
+    VGPaint _fill;
 };
 
 int main(int argc, char **argv) {
@@ -227,7 +291,7 @@ int main(int argc, char **argv) {
         return -1;
     }
     glfwMakeContextCurrent(window);
-    glfwSwapInterval( 0 );
+    glfwSwapInterval(0);
     vgCreateContextMNK(WINDOW_WIDTH, WINDOW_HEIGHT,
                        VG_RENDERING_BACKEND_TYPE_OPENGL33);
 
@@ -246,13 +310,15 @@ int main(int argc, char **argv) {
     constexpr int MAX_PHYSICS_OBJECTS = 1000 * 10;
     ;
     std::shared_ptr<zo::PhysicsSystem2d> physics_system =
-        zo::PhysicsSystem2d::create(MAX_PHYSICS_OBJECTS, 4, zo::BroadPhaseType::GRID);
+        zo::PhysicsSystem2d::create(MAX_PHYSICS_OBJECTS, 4,
+                                    zo::BroadPhaseType::GRID);
 
     std::vector<std::unique_ptr<GameObject>> game_objects;
 
     // create a static box
     std::unique_ptr<StaticBox> box =
-        std::make_unique<StaticBox>(physics_system, width-20, height-20, glm::vec2{width/2, height/2});
+        std::make_unique<StaticBox>(physics_system, width - 20, height - 20,
+                                    glm::vec2{width / 2, height / 2});
     game_objects.push_back(std::move(box));
 
     std::vector<float> game_obj_lifetime;
@@ -266,7 +332,6 @@ int main(int argc, char **argv) {
     blaster_ball->physicsObject().setVelocity({0, 0});
     game_objects.push_back(std::move(blaster_ball));
     game_obj_lifetime.push_back(30);
-
 
     // create a row of balls with random velocities
     const float BALL_RADIUS = 5.0f;
@@ -290,12 +355,18 @@ int main(int argc, char **argv) {
         }
     }
 
+    std::unique_ptr<TextRenderer> text_renderer =
+        std::make_unique<TextRenderer>("./assets/arial.fnt",
+                                       "./assets/arial.png");
+
     // set gravity
-    // physics_system->setGravity({0, 160.0f});
+    // physics_system->setGravity({0, -160.0f});
 
     float  last_time = glfwGetTime();
     double previous_seconds = glfwGetTime();
     int    frame_count = 0;
+    double fps = 0;
+    double ms_per_frame = 0;
     do {
 
         // Clear the screen.
@@ -304,6 +375,8 @@ int main(int argc, char **argv) {
 
         /// do an ortho camera
         // NOTE:  this is not standard OpenVG
+        // vgPushOrthoCamera(0.0f, (float)width, 0.0f, (float)height,
+        // -1.0f, 1.0f);
         vgPushOrthoCamera(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f);
 
         // update the physics system
@@ -323,22 +396,27 @@ int main(int argc, char **argv) {
 
         // calculate the frame rate
         double current_seconds = glfwGetTime();
-        double elapsed_seconds = current_seconds - previous_seconds;
+        double elapsed_seconds = current_seconds - previous_seconds;        
         if (elapsed_seconds > 0.25) {
             previous_seconds = current_seconds;
-            double fps = (double)frame_count / elapsed_seconds;
-            double ms_per_frame = 1000.0 / fps;
+            fps = (double)frame_count / elapsed_seconds;
+            ms_per_frame = 1000.0 / fps;
 
-            std::stringstream ss;
-            ss << "Zero Physics Hello World - " << std::fixed
-               << std::setprecision(2) << ms_per_frame << " ms/frame ("
-               << std::setprecision(1) << fps << " FPS)";
-            std::string title = ss.str();
-            glfwSetWindowTitle(window, title.c_str());
+            // std::stringstream ss;
+            // ss << "Zero Physics Hello World - " << std::fixed
+            //    << std::setprecision(2) << ms_per_frame << " ms/frame ("
+            //    << std::setprecision(1) << fps << " FPS)";
+            // std::string title = ss.str();
+            // glfwSetWindowTitle(window, title.c_str());
             frame_count = 0;
             // std::cout << ms_per_frame << " ms/frame (" << fps << " FPS)\n";
         }
         frame_count++;
+
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(2) << ms_per_frame << " ms/frame ("
+           << std::setprecision(1) << fps << " FPS)";
+        text_renderer->drawText(ss.str(), 10, 10, 0.2f);
 
         // Swap buffers
         glfwSwapBuffers(window);
@@ -347,7 +425,7 @@ int main(int argc, char **argv) {
         // remove game objects that have expired
         // for (int i = game_obj_lifetime.size()-1; i >= 1; i--) {
         //     if (game_obj_lifetime[i] < 0) {
-        //         game_objects.erase(game_objects.begin() + i);  
+        //         game_objects.erase(game_objects.begin() + i);
         //         game_obj_lifetime.erase(game_obj_lifetime.begin() + i);
         //     }
         // }
@@ -356,7 +434,6 @@ int main(int argc, char **argv) {
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
             game_objects[1]->physicsObject().setVelocity({150, 150});
         }
-
 
     } // Check if the ESC key was pressed or the window was closed
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&

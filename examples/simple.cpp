@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
     ball_phy_obj_2->setCollider(*circle_collider_2, 0);
 
     // add some gravity
-    physics_system->setGravity({0, 120.0f});
+    physics_system->setGravity({0, -120.0f});
 
     // create a small vg circle to represent the physics object
     VGPath circle_1 = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F,
@@ -149,8 +149,8 @@ int main(int argc, char **argv) {
 
     /// walls and floor segments
     std::array<glm::vec2, 4> segments = {
-        {glm::vec2{200, 100}, glm::vec2{200, 500}, glm::vec2{800, 500},
-         glm::vec2{800, 100}}};
+        {glm::vec2{20, height-20}, glm::vec2{20, 20}, glm::vec2{width-20, 20},
+         glm::vec2{width-20, height-20}}};
     
     // left wall collider
     zo::thick_line_segment_2d_t left_wall_segment{segments[0], segments[1],
@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
 
         /// do an ortho camera
         // NOTE:  this is not standard OpenVG
-        vgPushOrthoCamera(0.0f, (float)width, (float)height, 0.0f, -1.0f, 1.0f);
+        vgPushOrthoCamera(0.0f, (float)width, 0.0f, (float)height, -1.0f, 1.0f);
 
         // update the physics system
         float delta_time = glfwGetTime() - last_time;
